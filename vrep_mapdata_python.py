@@ -4,51 +4,54 @@ Created on Thu Oct 22 18:47:03 2015
 
 @author: Jonas
 """
-
-import vrep
+#import from Libaries which are usefull
+import vrep#needed for the Connection with the Simulator
 import sys
-import numpy as np
+import numpy as np#needed for the arrays and some other mathematical operations
 import time
 import math
-from scipy import interpolate
+from scipy import interpolate#needed for the interpolation functions
+import collections #needed for the queue       
+import heapq#needed for the queue
 
+
+#Definition of SquareGrid, a graph which describes the whole area
 class SquareGrid:
     def __init__(self, xmax, ymax, zmax):
         self.xmax = xmax
         self.ymax = ymax
         self.zmax = zmax
-    
+    #defines the costs for the way between 2 nodes, in our case the cost is the distance, so the algorythm finds the shortest path
     def cost(self, a, b):
         (x1, y1, z1) = a
         (x2, y2, z2) = b
         return math.sqrt((x1-x2)**2+(y1-y2)**2+(z1-z2)**2)
         #return 1
-        
+    #checks if a possible node is inside the moveable area    
     def in_bounds(self, id):
         (x, y, z) = id
         return 0 <= x < self.xmax and 0 <= y < self.ymax and 0 <= z < self.zmax
-    
+    #checks if something is in between 2 nodes, so that the object cant move this direction
     def passable(self, id):
         (x,y,z)=id
+        #arr[] is an array with the information about the obstacles in the area, filled by sensor information
         if arr[x,y,z]==0:
-            boo=3
+            boolean=3
         else:
-            boo=2
-        return boo==3
-    
+            boolean=2
+        return boolean==3
+    #returns all possible nodes to move on, means all theoretical possible nodes next to the given node, filtered by in_bounds() and passable()
     def neighbors(self, id):
         (x, y, z) = id
         results = [(x+1, y, z), (x, y-1, z), (x-1, y, z), (x, y+1, z),(x+1,y+1, z),(x+1,y-1, z),(x-1,y-1, z),(x-1,y+1, z),
                    (x, y, z+1),(x+1, y, z+1), (x, y-1, z+1), (x-1, y, z+1), (x, y+1, z+1),(x+1,y+1, z+1),(x+1,y-1, z+1),(x-1,y-1, z+1),(x-1,y+1, z+1),
                    (x, y, z-1),(x+1, y, z-1), (x, y-1, z-1), (x-1, y, z-1), (x, y+1, z-1),(x+1,y+1, z-1),(x+1,y-1, z-1),(x-1,y-1, z-1),(x-1,y+1, z-1)]
-        #if (x + y) % 2 == 0: results.reverse() # aesthetics
         results = filter(self.in_bounds, results)
         results = filter(self.passable, results)
         return results
         
-import collections        
-import heapq
 
+#this queue structure is needed for the A* algorythm and the difference to the Dijkstra algorythm, which would return the same result, but normally needs more time
 class PriorityQueue:
     def __init__(self):
         self.elements = []
@@ -63,14 +66,13 @@ class PriorityQueue:
         return heapq.heappop(self.elements)[1]
     
     
-        
+#this function is the difference between A* and Dijkstra, it returns the distance between a node and the goal, if 2 paths have the same cost it will use the path which is nearer to the goal       
 def heuristic(a, b):
     (x1, y1, z1) = a
     (x2, y2, z2) = b
-    #return abs(x1 - x2) + abs(y1 - y2) + abs(z1 - z2)
     return math.sqrt((x1-x2)**2+(y1-y2)**2+(z1-z2)**2)
-    #return 1
 
+#this is the Pathfinding algorythm A*, implemented by using the defined functions and datastructures
 def a_star_search(graph, start, goal):
     frontier = PriorityQueue()
     frontier.put(start, 0)
@@ -97,50 +99,54 @@ def a_star_search(graph, start, goal):
     
     return came_from, cost_so_far
 
+
 vrep.simxFinish(-1) # just in case, close all opened connections
 
 clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
 
-#arr=np.ndarray(shape=(30,30,10),dtype=float)
-#
-#errorCode,sensor1=vrep.simxGetObjectHandle(clientID,'Sensor_1',vrep.simx_opmode_oneshot_wait)
-#errorCode,detectionState,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor1,vrep.simx_opmode_streaming)            
-#
-#errorCode,sensor2=vrep.simxGetObjectHandle(clientID,'Sensor_2',vrep.simx_opmode_oneshot_wait)
-#errorCode,detectionState,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor2,vrep.simx_opmode_streaming)            
-#
-#time.sleep(3)
-#                                  
-#
-#index=0
-#index2=0
-#index3=0
-#for index in range(30):
-#    for index2 in range(30):
-#        for index3 in range(10):
-#        #for index3 in range(1):
-#             #Block an neue Position
-#            x=0.4+0.4*index
-#            y=0.2+0.4*index2
-#            z=0.3+0.4*index3
-#            vrep.simxSetObjectPosition (clientID,sensor1,-1,(x,y,z),vrep.simx_opmode_oneshot)
-#            vrep.simxSetObjectPosition (clientID,sensor2,-1,(x-0.4,y,z),vrep.simx_opmode_oneshot)
-#            time.sleep(0.2)            
-#            #Kollision prüfen 
-#            #vrep.simxGetCollisionHandle (regular API equivalent: simGetCollisionHandle)
-#            errorCode,detectionState1,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor1,vrep.simx_opmode_buffer)            
-#            errorCode,detectionState2,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor2,vrep.simx_opmode_buffer)            
-#                        
-#            if (detectionState1 or detectionState2):            
-#                arr[index,index2,index3]=1   #Ergebnis speichern
-#            else:
-#                arr[index,index2,index3]=0 
-#            #time.sleep(0.2)
+#Create the empty Grid, to save obstacle information later
+arr=np.ndarray(shape=(30,30,10),dtype=float)
+#Initiate Sensor 1
+errorCode,sensor1=vrep.simxGetObjectHandle(clientID,'Sensor_1',vrep.simx_opmode_oneshot_wait)
+errorCode,detectionState,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor1,vrep.simx_opmode_streaming)            
+#Initiate Sensor 2
+errorCode,sensor2=vrep.simxGetObjectHandle(clientID,'Sensor_2',vrep.simx_opmode_oneshot_wait)
+errorCode,detectionState,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor2,vrep.simx_opmode_streaming)            
+#wait some time, for the end of the sensor initiation
+time.sleep(3)
+                                  
+#some for loops to move the sensors throug all the area and detect all obstacles
+index=0
+index2=0
+index3=0
+for index in range(30):#x-Direction
+    for index2 in range(30):#y-Direction
+        for index3 in range(10):#z-Direction
+        #for index3 in range(1):
+             #calculate new Sensor position in m
+            x=0.4+0.4*index#start value + value correspondending to the array index
+            y=0.2+0.4*index2
+            z=0.3+0.4*index3
+            #move Sensor 1 and 2 to the next position in the grid
+            vrep.simxSetObjectPosition (clientID,sensor1,-1,(x,y,z),vrep.simx_opmode_oneshot)
+            vrep.simxSetObjectPosition (clientID,sensor2,-1,(x-0.4,y,z),vrep.simx_opmode_oneshot)
+            #wait till the sensor had time to check for objects
+            time.sleep(0.2)            
+            #read Sensor 1 and 2
+            errorCode,detectionState1,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor1,vrep.simx_opmode_buffer)            
+            errorCode,detectionState2,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor2,vrep.simx_opmode_buffer)            
+            #save the sensor-results in the "arr" array         
+            if (detectionState1 or detectionState2):            
+                arr[index,index2,index3]=1   #value 1 means obstacle
+            else:
+                arr[index,index2,index3]=0   #vale 0 means nothing in the way
 
-
+#create a grid
 grid=SquareGrid(30,30,10)
-#Kosten=grid.cost((1,1),(5,3))
+#start the Pathfinding algorythm
 came_from, cost_so_far = a_star_search(grid, (0, 0, 0), (8, 16, 0))
+
+#this function is need to get the path(in points, nodes) from the results of the pathfinding algorythm
 def reconstruct_path(came_from, start, goal):
     current = goal
     path = [current]
@@ -150,32 +156,31 @@ def reconstruct_path(came_from, start, goal):
     path.reverse()
     return path
 
+#use the reconstruct function to get the path
 path2=reconstruct_path(came_from,(0,0,0),(8,16,0))
-path3=path2
+
+#need to control the quadrocopter later, by just moving away the target slowly
 errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
 
-
+#function to check for obstacles between 2 nodes, which are not directly neighbors
 def collision(a,b):
     (x1,y1,z1)=a
     (x2,y2,z2)=b
     out=0;
-    #Gerade zur Interpolation zwischen 2 Punkten
+    #straight line between the 2 nodes, 1000 points in between are calculated
     for l in range(1000):
-        
-        x=x1+(x2-x1)*(l+1)/1000      
-        
-        y=y1+(y2-y1)*(l+1)/1000      
-        
+        x=x1+(x2-x1)*(l+1)/1000
+        y=y1+(y2-y1)*(l+1)/1000     
         z=z1+(z2-z1)*(l+1)/1000       
-        
+        #round the result to get the array indexs 
         x=round(x,0)
         y=round(y,0)
         z=round(z,0)
-        
         out=out+arr[x,y,z]
+    #returns only true, if all nodes checked in the array returned the value 0 which means no obstacle
     return out==0
 
-def winkel_berechnen1(a,b):
+def angle_calculationx(a,b):
     dot = np.dot(a,b)
     x_modulus = np.sqrt(a[0]**2+a[1]**2+a[2]**2)
     y_modulus = np.sqrt(b[0]**2+b[1]**2+b[2]**2)
@@ -188,53 +193,56 @@ def winkel_berechnen1(a,b):
     else:
         return -angle
 
-def winkel_berechnen2(a,b):
+def angle_calculationy(a,b):
     dot = np.dot(a,b)
     x_modulus = np.sqrt(a[0]**2+a[1]**2+a[2]**2)
     y_modulus = np.sqrt(b[0]**2+b[1]**2+b[2]**2)
     cos_angle = dot / x_modulus / y_modulus 
-    angle = np.arccos(cos_angle) # Winkel in Bogenmaß 
-    ang2=angle*360/2/np.pi
-    #print ang2
+    angle = np.arccos(cos_angle) # angle in radiant
     if a[2]>0:
         return angle
     else:
         return -angle
        
 #interpolation
-#1. Schritt unnötige Zwischenknoten eliminieren
-weiter=1
-while weiter>0:
-    weiter=0
+#1. step elimination of unnecessary nodes in the path, makes the path shorter, because of more direct movements
+in_progress=1
+while in_progress>0:
+    in_progress=0
     i=0
     while i <(len(path2)-2):
         if collision(path2[i],path2[i+2]):
             path2.pop(i+1)
-            weiter=1
+            in_progress=1
         i=i+1
-#2. Schritt
-data=np.ndarray(shape=(len(path2),3),dtype=float)
+#2. step interpolate the remainging corner points of the path by using different degrees of polynoms
+data=np.ndarray(shape=(len(path2),3),dtype=float)   #create an array of float type for the input points
+#fill the array with the Pathdata
 for i in range(len(path2)):
     (x,y,z)=path2[i]
     data[i,0]=x
     data[i,1]=y
     data[i,2]=z
-
+#arrange the data to use the function
 data = data.transpose()
+#interpolate polynom degree 1
 tck, u= interpolate.splprep(data,k=1)
-new1 = interpolate.splev(np.linspace(0,1,100), tck)
+linear = interpolate.splev(np.linspace(0,1,100), tck)
+#interpolate polynom degree 2
 tck, u= interpolate.splprep(data,k=2)
-new2 = interpolate.splev(np.linspace(0,1,100), tck)
+quadratic = interpolate.splev(np.linspace(0,1,100), tck)
+#interpolate polynom degree 3
 tck, u= interpolate.splprep(data,k=3)
-new3 = interpolate.splev(np.linspace(0,1,100), tck)
-
+qubic = interpolate.splev(np.linspace(0,1,100), tck)
+#Linear
+#get the Object handle of the green arrow
 errorCode,Arrow=vrep.simxGetObjectHandle(clientID,'Arrow',vrep.simx_opmode_oneshot_wait)
 objectHandles=np.array([Arrow])
-#trajektorie abfliegen, indem das Ziel immer weiter geschoben wird
+#put arrows on every point the trajectory pointing in the direction of the next point
 for next in range(100):
-    a1=new1[0]
-    b1=new1[1]
-    c1=new1[2]
+    a1=linear[0]
+    b1=linear[1]
+    c1=linear[2]
     a=a1[next]
     b=b1[next]
     c=c1[next]
@@ -255,17 +263,16 @@ for next in range(100):
     returnCode,newObjectHandles=vrep.simxCopyPasteObjects(clientID,objectHandles,vrep.simx_opmode_oneshot_wait)
     Arro=newObjectHandles[0]
     vrep.simxSetObjectPosition (clientID,Arro,-1,(0,0,0),vrep.simx_opmode_oneshot)
-    returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[winkel_berechnen1([0,bdiff,cdiff],[0,0,-1]),-winkel_berechnen2([0,bdiff,cdiff],[adiff,bdiff,cdiff]),0],vrep.simx_opmode_oneshot) #winkel_berechnen([0,bdiff,cdiff],[adiff,bdiff,cdiff])
-    #returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[np.pi/2,0,0],vrep.simx_opmode_oneshot)    
+    returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[angle_calculationx([0,bdiff,cdiff],[0,0,-1]),-angle_calculationy([0,bdiff,cdiff],[adiff,bdiff,cdiff]),0],vrep.simx_opmode_oneshot)   
     vrep.simxSetObjectPosition (clientID,Arro,-1,(x,y,z),vrep.simx_opmode_oneshot)
-
+#Quadratic
 errorCode,Arrow=vrep.simxGetObjectHandle(clientID,'Arrow2',vrep.simx_opmode_oneshot_wait)
 objectHandles=np.array([Arrow])
-#trajektorie abfliegen, indem das Ziel immer weiter geschoben wird
+#put arrows on every point the trajectory pointing in the direction of the next point
 for next in range(100):
-    a1=new2[0]
-    b1=new2[1]
-    c1=new2[2]
+    a1=quadratic[0]
+    b1=quadratic[1]
+    c1=quadratic[2]
     a=a1[next]
     b=b1[next]
     c=c1[next]
@@ -286,17 +293,16 @@ for next in range(100):
     returnCode,newObjectHandles=vrep.simxCopyPasteObjects(clientID,objectHandles,vrep.simx_opmode_oneshot_wait)
     Arro=newObjectHandles[0]
     vrep.simxSetObjectPosition (clientID,Arro,-1,(0,0,0),vrep.simx_opmode_oneshot)
-    returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[winkel_berechnen1([0,bdiff,cdiff],[0,0,-1]),-winkel_berechnen2([0,bdiff,cdiff],[adiff,bdiff,cdiff]),0],vrep.simx_opmode_oneshot) #winkel_berechnen([0,bdiff,cdiff],[adiff,bdiff,cdiff])
-    #returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[np.pi/2,0,0],vrep.simx_opmode_oneshot)    
+    returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[angle_calculationx([0,bdiff,cdiff],[0,0,-1]),-angle_calculationy([0,bdiff,cdiff],[adiff,bdiff,cdiff]),0],vrep.simx_opmode_oneshot)  
     vrep.simxSetObjectPosition (clientID,Arro,-1,(x,y,z),vrep.simx_opmode_oneshot)
-
+#Qubic
 errorCode,Arrow=vrep.simxGetObjectHandle(clientID,'Arrow3',vrep.simx_opmode_oneshot_wait)
 objectHandles=np.array([Arrow])
-#trajektorie abfliegen, indem das Ziel immer weiter geschoben wird
+#put arrows on every point the trajectory pointing in the direction of the next point
 for next in range(100):
-    a1=new3[0]
-    b1=new3[1]
-    c1=new3[2]
+    a1=qubic[0]
+    b1=qubic[1]
+    c1=qubic[2]
     a=a1[next]
     b=b1[next]
     c=c1[next]
@@ -317,13 +323,13 @@ for next in range(100):
     returnCode,newObjectHandles=vrep.simxCopyPasteObjects(clientID,objectHandles,vrep.simx_opmode_oneshot_wait)
     Arro=newObjectHandles[0]
     vrep.simxSetObjectPosition (clientID,Arro,-1,(0,0,0),vrep.simx_opmode_oneshot)
-    returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[winkel_berechnen1([0,bdiff,cdiff],[0,0,-1]),-winkel_berechnen2([0,bdiff,cdiff],[adiff,bdiff,cdiff]),0],vrep.simx_opmode_oneshot) #winkel_berechnen([0,bdiff,cdiff],[adiff,bdiff,cdiff])
-    #returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[np.pi/2,0,0],vrep.simx_opmode_oneshot)    
+    returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[angle_calculationx([0,bdiff,cdiff],[0,0,-1]),-angle_calculationy([0,bdiff,cdiff],[adiff,bdiff,cdiff]),0],vrep.simx_opmode_oneshot) #winkel_berechnen([0,bdiff,cdiff],[adiff,bdiff,cdiff])
     vrep.simxSetObjectPosition (clientID,Arro,-1,(x,y,z),vrep.simx_opmode_oneshot)    
+    #commands to move the quadrocopter    
     #vrep.simxSetObjectPosition (clientID,UAV,-1,(x,y,z),vrep.simx_opmode_oneshot)
     #time.sleep(1)
 #returnCode,position=vrep.simxGetJointPosition(clientID,UAV,vrep.simx_opmode_buffer)
 
 #returnCode=vrep.simxSetJointTargetPosition(clientID,UAV,1.0,vrep.simx_opmode_oneshot)
 
-print 'fertig'
+print 'finished'
