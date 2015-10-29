@@ -1,6 +1,10 @@
-Make sure you have following files in your directory, in order to run the various examples:
+This programm is tested for V-REP in combination spyder.
 
-1. vrep.py
-2. vrepConst.py
-3. the appropriate remote API library: "remoteApi.dll" (Windows), "remoteApi.dylib" (Mac) or "remoteApi.so" (Linux)
-4. simpleTest.py (or any other example file)
+Mapdata:
+The file "arr_0000.npy" contains the mapdata, if you dont wont to run the code for mapgeneration for "testroom.ttt" open this array in spyder und rename it to "arr"
+
+Simulation scene:
+"testroom.ttt"
+
+Programm code:
+The code is located in "vrep_mapdata_python.py" it contains all steps from mapgeneration->path finding->path smoothing
