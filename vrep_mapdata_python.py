@@ -41,11 +41,17 @@ class SquareGrid:
             boolean=2
         return boolean==3
     #returns all possible nodes to move on, means all theoretical possible nodes next to the given node, filtered by in_bounds() and passable()
+#    def neighbors(self, id):
+#        (x, y, z) = id
+#        results = [(x+1, y, z), (x, y-1, z), (x-1, y, z), (x, y+1, z),(x+1,y+1, z),(x+1,y-1, z),(x-1,y-1, z),(x-1,y+1, z),
+#                   (x, y, z+1),(x+1, y, z+1), (x, y-1, z+1), (x-1, y, z+1), (x, y+1, z+1),(x+1,y+1, z+1),(x+1,y-1, z+1),(x-1,y-1, z+1),(x-1,y+1, z+1),
+#                   (x, y, z-1),(x+1, y, z-1), (x, y-1, z-1), (x-1, y, z-1), (x, y+1, z-1),(x+1,y+1, z-1),(x+1,y-1, z-1),(x-1,y-1, z-1),(x-1,y+1, z-1)]
+#        results = filter(self.in_bounds, results)
+#        results = filter(self.passable, results)
+#        return results
     def neighbors(self, id):
         (x, y, z) = id
-        results = [(x+1, y, z), (x, y-1, z), (x-1, y, z), (x, y+1, z),(x+1,y+1, z),(x+1,y-1, z),(x-1,y-1, z),(x-1,y+1, z),
-                   (x, y, z+1),(x+1, y, z+1), (x, y-1, z+1), (x-1, y, z+1), (x, y+1, z+1),(x+1,y+1, z+1),(x+1,y-1, z+1),(x-1,y-1, z+1),(x-1,y+1, z+1),
-                   (x, y, z-1),(x+1, y, z-1), (x, y-1, z-1), (x-1, y, z-1), (x, y+1, z-1),(x+1,y+1, z-1),(x+1,y-1, z-1),(x-1,y-1, z-1),(x-1,y+1, z-1)]
+        results = [(x+1, y, z), (x, y-1, z), (x-1, y, z), (x, y+1, z),(x, y, z+1),(x, y, z-1)]
         results = filter(self.in_bounds, results)
         results = filter(self.passable, results)
         return results
@@ -104,47 +110,47 @@ vrep.simxFinish(-1) # just in case, close all opened connections
 
 clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
 
-#Create the empty Grid, to save obstacle information later
-arr=np.ndarray(shape=(30,30,10),dtype=float)
-#Initiate Sensor 1
-errorCode,sensor1=vrep.simxGetObjectHandle(clientID,'Sensor_1',vrep.simx_opmode_oneshot_wait)
-errorCode,detectionState,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor1,vrep.simx_opmode_streaming)            
-#Initiate Sensor 2
-errorCode,sensor2=vrep.simxGetObjectHandle(clientID,'Sensor_2',vrep.simx_opmode_oneshot_wait)
-errorCode,detectionState,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor2,vrep.simx_opmode_streaming)            
-#wait some time, for the end of the sensor initiation
-time.sleep(3)
-                                  
-#some for loops to move the sensors throug all the area and detect all obstacles
-index=0
-index2=0
-index3=0
-for index in range(30):#x-Direction
-    for index2 in range(30):#y-Direction
-        for index3 in range(10):#z-Direction
-        #for index3 in range(1):
-             #calculate new Sensor position in m
-            x=0.4+0.4*index#start value + value correspondending to the array index
-            y=0.2+0.4*index2
-            z=0.3+0.4*index3
-            #move Sensor 1 and 2 to the next position in the grid
-            vrep.simxSetObjectPosition (clientID,sensor1,-1,(x,y,z),vrep.simx_opmode_oneshot)
-            vrep.simxSetObjectPosition (clientID,sensor2,-1,(x-0.4,y,z),vrep.simx_opmode_oneshot)
-            #wait till the sensor had time to check for objects
-            time.sleep(0.2)            
-            #read Sensor 1 and 2
-            errorCode,detectionState1,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor1,vrep.simx_opmode_buffer)            
-            errorCode,detectionState2,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor2,vrep.simx_opmode_buffer)            
-            #save the sensor-results in the "arr" array         
-            if (detectionState1 or detectionState2):            
-                arr[index,index2,index3]=1   #value 1 means obstacle
-            else:
-                arr[index,index2,index3]=0   #vale 0 means nothing in the way
+##Create the empty Grid, to save obstacle information later
+#arr=np.ndarray(shape=(30,30,10),dtype=float)
+##Initiate Sensor 1
+#errorCode,sensor1=vrep.simxGetObjectHandle(clientID,'Sensor_1',vrep.simx_opmode_oneshot_wait)
+#errorCode,detectionState,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor1,vrep.simx_opmode_streaming)            
+##Initiate Sensor 2
+#errorCode,sensor2=vrep.simxGetObjectHandle(clientID,'Sensor_2',vrep.simx_opmode_oneshot_wait)
+#errorCode,detectionState,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor2,vrep.simx_opmode_streaming)            
+##wait some time, for the end of the sensor initiation
+#time.sleep(3)
+#                                  
+##some for loops to move the sensors throug all the area and detect all obstacles
+#index=0
+#index2=0
+#index3=0
+#for index in range(30):#x-Direction
+#    for index2 in range(30):#y-Direction
+#        for index3 in range(10):#z-Direction
+#        #for index3 in range(1):
+#             #calculate new Sensor position in m
+#            x=0.4+0.4*index#start value + value correspondending to the array index
+#            y=0.2+0.4*index2
+#            z=0.3+0.4*index3
+#            #move Sensor 1 and 2 to the next position in the grid
+#            vrep.simxSetObjectPosition (clientID,sensor1,-1,(x,y,z),vrep.simx_opmode_oneshot)
+#            vrep.simxSetObjectPosition (clientID,sensor2,-1,(x-0.4,y,z),vrep.simx_opmode_oneshot)
+#            #wait till the sensor had time to check for objects
+#            time.sleep(0.3)            
+#            #read Sensor 1 and 2
+#            errorCode,detectionState1,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor1,vrep.simx_opmode_buffer)            
+#            errorCode,detectionState2,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor2,vrep.simx_opmode_buffer)            
+#            #save the sensor-results in the "arr" array         
+#            if (detectionState1 or detectionState2):            
+#                arr[index,index2,index3]=1   #value 1 means obstacle
+#            else:
+#                arr[index,index2,index3]=0   #vale 0 means nothing in the way
 
 #create a grid
 grid=SquareGrid(30,30,10)
 #start the Pathfinding algorythm
-came_from, cost_so_far = a_star_search(grid, (0, 0, 0), (8, 16, 0))
+came_from, cost_so_far = a_star_search(grid, (0, 0, 0), (16, 16, 0))
 
 #this function is need to get the path(in points, nodes) from the results of the pathfinding algorythm
 def reconstruct_path(came_from, start, goal):
@@ -157,7 +163,7 @@ def reconstruct_path(came_from, start, goal):
     return path
 
 #use the reconstruct function to get the path
-path2=reconstruct_path(came_from,(0,0,0),(8,16,0))
+path2=reconstruct_path(came_from,(0,0,0),(16,16,0))
 
 #need to control the quadrocopter later, by just moving away the target slowly
 errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
@@ -203,7 +209,18 @@ def angle_calculationy(a,b):
         return angle
     else:
         return -angle
-       
+
+errorCode,Ball=vrep.simxGetObjectHandle(clientID,'A_star_points',vrep.simx_opmode_oneshot_wait)
+objectHandles=np.array([Ball])
+for next in path2:
+    (a,b,c)=next
+    x=0.4+0.4*a
+    y=0.2+0.4*b
+    z=0.3+0.4*c
+    returnCode,newObjectHandles=vrep.simxCopyPasteObjects(clientID,objectHandles,vrep.simx_opmode_oneshot_wait)
+    Ball_new=newObjectHandles[0]
+    vrep.simxSetObjectPosition (clientID,Ball_new,-1,(x,y,z),vrep.simx_opmode_oneshot)
+     
 #interpolation
 #1. step elimination of unnecessary nodes in the path, makes the path shorter, because of more direct movements
 in_progress=1
@@ -215,6 +232,19 @@ while in_progress>0:
             path2.pop(i+1)
             in_progress=1
         i=i+1
+       
+#Mark the points in the simulation 
+errorCode,Ball=vrep.simxGetObjectHandle(clientID,'A_star_points_filtered',vrep.simx_opmode_oneshot_wait)
+objectHandles=np.array([Ball])
+for next in path2:
+    (a,b,c)=next
+    x=0.4+0.4*a
+    y=0.2+0.4*b
+    z=0.3+0.4*c
+    returnCode,newObjectHandles=vrep.simxCopyPasteObjects(clientID,objectHandles,vrep.simx_opmode_oneshot_wait)
+    Ball_new=newObjectHandles[0]
+    vrep.simxSetObjectPosition (clientID,Ball_new,-1,(x,y,z),vrep.simx_opmode_oneshot)
+       
 #2. step interpolate the remainging corner points of the path by using different degrees of polynoms
 data=np.ndarray(shape=(len(path2),3),dtype=float)   #create an array of float type for the input points
 #fill the array with the Pathdata
@@ -226,13 +256,13 @@ for i in range(len(path2)):
 #arrange the data to use the function
 data = data.transpose()
 #interpolate polynom degree 1
-tck, u= interpolate.splprep(data,k=1)
+tck, u= interpolate.splprep(data,k=1,s=0.1)
 linear = interpolate.splev(np.linspace(0,1,100), tck)
 #interpolate polynom degree 2
-tck, u= interpolate.splprep(data,k=2)
+tck, u= interpolate.splprep(data,k=2,s=0.1)
 quadratic = interpolate.splev(np.linspace(0,1,100), tck)
 #interpolate polynom degree 3
-tck, u= interpolate.splprep(data,k=3)
+tck, u= interpolate.splprep(data,k=3,s=0.1)
 qubic = interpolate.splev(np.linspace(0,1,100), tck)
 #Linear
 #get the Object handle of the green arrow
