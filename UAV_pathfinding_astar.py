@@ -15,6 +15,57 @@ from scipy import interpolate#needed for the interpolation functions
 import collections #needed for the queue       
 import heapq#needed for the queue
 
+def search(goal,start,search_type,interpolation,mapdata):
+    (x,y,z)=mapdata.shape
+    grid=SquareGrid(x,y,z)
+    if search_type=="astar":
+        came_from, cost_so_far = a_star_search(grid, start, goal) 
+        path=reconstruct_path(came_from,start,goal)
+        
+    else:
+    
+    path=interpolation_skip_points(path)
+    #2. step interpolate the remainging corner points of the path by using different degrees of polynoms
+    data=np.ndarray(shape=(len(path),3),dtype=float)   #create an array of float type for the input points
+    #fill the array with the Pathdata
+    for i in range(len(path2)):
+        (x,y,z)=path2[i]
+        data[i,0]=x
+        data[i,1]=y
+        data[i,2]=z
+    #arrange the data to use the function
+    data = data.transpose()
+    #interpolate polynom degree 1
+    if interpolation==1:
+        tck, u= interpolate.splprep(data,k=1,s=0.1)
+        linear = interpolate.splev(np.linspace(0,1,100), tck)
+    #interpolate polynom degree 2
+    if interpolation==2:
+        tck, u= interpolate.splprep(data,k=2,s=0.1)
+        quadratic = interpolate.splev(np.linspace(0,1,100), tck)
+    #interpolate polynom degree 3
+    if interpolation==3:
+        tck, u= interpolate.splprep(data,k=3,s=0.1)
+        qubic = interpolate.splev(np.linspace(0,1,100), tck)
+    
+    return qubic
+    
+    
+    
+    
+#interpolation
+#1. step elimination of unnecessary nodes in the path, makes the path shorter, because of more direct movements       
+def interpolation_skip_points(path):
+    in_progress=1
+    while in_progress>0:
+        in_progress=0
+        i=0
+        while i <(len(path)-2):
+            if collision(path[i],path[i+2]):
+                path.pop(i+1)
+                in_progress=1
+            i=i+1
+    return
 
 
 #this queue structure is needed for the A* algorythm and the difference to the Dijkstra algorythm, which would return the same result, but normally needs more time
@@ -66,20 +117,74 @@ def a_star_search(graph, start, goal):
     return came_from, cost_so_far
     
     
+#Definition of SquareGrid, a graph which describes the whole area
+class SquareGrid:
+    def __init__(self, xmax, ymax, zmax):
+        self.xmax = xmax
+        self.ymax = ymax
+        self.zmax = zmax
+    #defines the costs for the way between 2 nodes, in our case the cost is the distance, so the algorythm finds the shortest path
+    def cost(self, a, b):
+        (x1, y1, z1) = a
+        (x2, y2, z2) = b
+        return math.sqrt((x1-x2)**2+(y1-y2)**2+(z1-z2)**2)
+        #return 1
+    #checks if a possible node is inside the moveable area    
+    def in_bounds(self, id):
+        (x, y, z) = id
+        return 0 <= x < self.xmax and 0 <= y < self.ymax and 0 <= z < self.zmax
+    #checks if something is in between 2 nodes, so that the object cant move this direction
+    def passable(self, id):
+        (x,y,z)=id
+        #arr[] is an array with the information about the obstacles in the area, filled by sensor information
+        if mapdata[x,y,z]==0:
+            boolean=3
+        else:
+            boolean=2
+        return boolean==3
+    #returns all possible nodes to move on, means all theoretical possible nodes next to the given node, filtered by in_bounds() and passable()
+#    def neighbors(self, id):
+#        (x, y, z) = id
+#        results = [(x+1, y, z), (x, y-1, z), (x-1, y, z), (x, y+1, z),(x+1,y+1, z),(x+1,y-1, z),(x-1,y-1, z),(x-1,y+1, z),
+#                   (x, y, z+1),(x+1, y, z+1), (x, y-1, z+1), (x-1, y, z+1), (x, y+1, z+1),(x+1,y+1, z+1),(x+1,y-1, z+1),(x-1,y-1, z+1),(x-1,y+1, z+1),
+#                   (x, y, z-1),(x+1, y, z-1), (x, y-1, z-1), (x-1, y, z-1), (x, y+1, z-1),(x+1,y+1, z-1),(x+1,y-1, z-1),(x-1,y-1, z-1),(x-1,y+1, z-1)]
+#        results = filter(self.in_bounds, results)
+#        results = filter(self.passable, results)
+#        return results
+    def neighbors(self, id):
+        (x, y, z) = id
+        results = [(x+1, y, z), (x, y-1, z), (x-1, y, z), (x, y+1, z),(x, y, z+1),(x, y, z-1)]
+        results = filter(self.in_bounds, results)
+        results = filter(self.passable, results)
+        return results
+
+def collision(a,b):
+    (x1,y1,z1)=a
+    (x2,y2,z2)=b
+    out=0;
+    #straight line between the 2 nodes, 1000 points in between are calculated
+    for l in range(1000):
+        x=x1+(x2-x1)*(l+1)/1000
+        y=y1+(y2-y1)*(l+1)/1000     
+        z=z1+(z2-z1)*(l+1)/1000       
+        #round the result to get the array indexs 
+        x=round(x,0)
+        y=round(y,0)
+        z=round(z,0)
+        out=out+arr[x,y,z]
+    #returns only true, if all nodes checked in the array returned the value 0 which means no obstacle
+    return out==0
 
 
+#vrep.simxFinish(-1) # just in case, close all opened connections
 
-
-
-vrep.simxFinish(-1) # just in case, close all opened connections
-
-clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
+#clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
 
 
 #create a grid
-grid=SquareGrid(30,30,10)
+#grid=SquareGrid(30,30,10)
 #start the Pathfinding algorythm
-came_from, cost_so_far = a_star_search(grid, (0, 0, 0), (16, 16, 0))
+#came_from, cost_so_far = a_star_search(grid, (0, 0, 0), (16, 16, 0))
 
 #this function is need to get the path(in points, nodes) from the results of the pathfinding algorythm
 def reconstruct_path(came_from, start, goal):
@@ -92,8 +197,8 @@ def reconstruct_path(came_from, start, goal):
     return path
 
 #use the reconstruct function to get the path
-path2=reconstruct_path(came_from,(0,0,0),(16,16,0))
+#path2=reconstruct_path(came_from,(0,0,0),(16,16,0))
 
 #need to control the quadrocopter later, by just moving away the target slowly
-errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
+#errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
 
