@@ -25,30 +25,9 @@ def search(goal,start,search_type,interpolation,mapdata):
     else:
     
     path=interpolation_skip_points(path)
-    #2. step interpolate the remainging corner points of the path by using different degrees of polynoms
-    data=np.ndarray(shape=(len(path),3),dtype=float)   #create an array of float type for the input points
-    #fill the array with the Pathdata
-    for i in range(len(path2)):
-        (x,y,z)=path2[i]
-        data[i,0]=x
-        data[i,1]=y
-        data[i,2]=z
-    #arrange the data to use the function
-    data = data.transpose()
-    #interpolate polynom degree 1
-    if interpolation==1:
-        tck, u= interpolate.splprep(data,k=1,s=0.1)
-        linear = interpolate.splev(np.linspace(0,1,100), tck)
-    #interpolate polynom degree 2
-    if interpolation==2:
-        tck, u= interpolate.splprep(data,k=2,s=0.1)
-        quadratic = interpolate.splev(np.linspace(0,1,100), tck)
-    #interpolate polynom degree 3
-    if interpolation==3:
-        tck, u= interpolate.splprep(data,k=3,s=0.1)
-        qubic = interpolate.splev(np.linspace(0,1,100), tck)
+    path=interpolation_polynom(path,interpolation)
     
-    return qubic
+    return path
     
     
     
@@ -67,6 +46,30 @@ def interpolation_skip_points(path):
             i=i+1
     return
 
+ #2. step interpolate the remainging corner points of the path by using different degrees of polynoms
+def interpolation_polynom(path,grad):
+    data=np.ndarray(shape=(len(path),3),dtype=float)   #create an array of float type for the input points
+    #fill the array with the Pathdata
+    for i in range(len(path)):
+        (x,y,z)=path[i]
+        data[i,0]=x
+        data[i,1]=y
+        data[i,2]=z
+    #arrange the data to use the function
+    data = data.transpose()
+    #interpolate polynom degree 1
+    if grad==1:
+        tck, u= interpolate.splprep(data,k=1,s=0.1)
+        path = interpolate.splev(np.linspace(0,1,100), tck)
+    #interpolate polynom degree 2
+    if grad==2:
+        tck, u= interpolate.splprep(data,k=2,s=0.1)
+        path = interpolate.splev(np.linspace(0,1,100), tck)
+    #interpolate polynom degree 3
+    if grad==3:
+        tck, u= interpolate.splprep(data,k=3,s=0.1)
+        path = interpolate.splev(np.linspace(0,1,100), tck)
+    return path
 
 #this queue structure is needed for the A* algorythm and the difference to the Dijkstra algorythm, which would return the same result, but normally needs more time
 class PriorityQueue:
