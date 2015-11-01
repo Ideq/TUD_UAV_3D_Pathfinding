@@ -26,12 +26,14 @@ mapdata=UAV_mapgen.mapgen("testroom",12,12,4,clientID)
     #function
         #output
             #(x,y,z), named goal_position
+        #get the position of the goal object from V-REP
 
 #Get start-data from v-REP
     start_position=(0,0,0)
     #function
         #output
             #(x,y,z), named start_position
+        #get the position of the quadrocopter from V-REP
 
 #Start pathfinding
 path=UAV_pathfinding_astar.search(goal_position,start_position,"astar",3,mapdata)
