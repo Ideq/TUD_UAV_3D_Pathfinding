@@ -16,22 +16,28 @@ import collections #needed for the queue
 import heapq#needed for the queue
 
 def search(goal,start,search_type,interpolation,mapdata):
+    goal2=m_to_grid(goal)
+    start2=m_to_grid(start)
     (x,y,z)=mapdata.shape
     grid=SquareGrid(x,y,z)
     if search_type=="astar":
-        came_from, cost_so_far = a_star_search(grid, start, goal) 
-        path=reconstruct_path(came_from,start,goal)
-        
-    else:
-    
-    path=interpolation_skip_points(path)
-    path=interpolation_polynom(path,interpolation)
-    
+        came_from, cost_so_far = a_star_search(grid, start2, goal2) 
+        path=reconstruct_path(came_from,start2,goal2)
+#    path=interpolation_skip_points(path)
+#    path=interpolation_polynom(path,interpolation)
+    #print came_from
     return path
+    #return
     
-    
-    
-    
+def m_to_grid(point):   
+    xm=point[0]
+    ym=point[1]
+    zm=point[2]
+    xgrid=round(xm/0.4-1,0)
+    ygrid=round(ym/0.4-1,0)
+    zgrid=round(zm/0.4-1,0)
+    point=(xgrid,ygrid,zgrid)
+    return point
 #interpolation
 #1. step elimination of unnecessary nodes in the path, makes the path shorter, because of more direct movements       
 def interpolation_skip_points(path):
@@ -205,3 +211,4 @@ def reconstruct_path(came_from, start, goal):
 #need to control the quadrocopter later, by just moving away the target slowly
 #errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
 
+search([1,1,1],[0.4,0.4,0.4],"astar",3,mapdata)

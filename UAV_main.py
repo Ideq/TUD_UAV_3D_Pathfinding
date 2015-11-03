@@ -9,12 +9,13 @@ Created on Sun Nov 01 15:34:40 2015
 import vrep
 import UAV_mapgen
 import UAV_pathfinding_astar
+import numpy as np
 #start Connection to V-REP
 vrep.simxFinish(-1) # just in case, close all opened connections
 clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
 
 #generate mapdata, load data if mapdata for scene exist not implemented till now   
-mapdata=UAV_mapgen.mapgen("testroom",12,12,4,clientID)
+#mapdata=UAV_mapgen.mapgen("testroom",12,12,4,clientID)
     #function
         #input
             #scene-name,x(in m),y(in m),z(in m) 
@@ -22,14 +23,14 @@ mapdata=UAV_mapgen.mapgen("testroom",12,12,4,clientID)
             #array, named "mapdata"
 
 #Get goal-data from V-REP
-    goal_position=(1.5,2.5,3)
+goal_position=UAV_VREP.getPosition(clientID,"goal")
     #function
         #output
             #(x,y,z), named goal_position
         #get the position of the goal object from V-REP
 
 #Get start-data from v-REP
-    start_position=(0,0,0)
+start_position=np.array([0,0,0])
     #function
         #output
             #(x,y,z), named start_position

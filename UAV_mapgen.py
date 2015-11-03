@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 30 14:52:27 2015
-
 @author: lijinke
 """
 
@@ -31,9 +30,9 @@ def mapgen(scene_name,x,y,z,clientID):
         xmax=x/0.4
         ymax=y/0.4 
         zmax=z/0.4                        
-        xmax=round(xmax,0)
-        ymax=round(ymax,0)
-        zmax=round(zmax,0)
+        xmax=int(round(xmax,0))
+        ymax=int(round(ymax,0))
+        zmax=int(round(zmax,0))
         arr=np.ndarray(shape=(xmax,ymax,zmax),dtype=int)
 #index=0
 #index2=0
@@ -59,4 +58,6 @@ def mapgen(scene_name,x,y,z,clientID):
                     else:
                         arr[index,index2,index3]=0 
             #time.sleep(0.2)
-return arr
+    return arr
+    
+#mapgen("testroom",12,12,4,clientID)

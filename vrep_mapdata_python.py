@@ -150,7 +150,14 @@ clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
 #create a grid
 grid=SquareGrid(30,30,10)
 #start the Pathfinding algorythm
-came_from, cost_so_far = a_star_search(grid, (0, 0, 0), (16, 16, 0))
+
+#find the goal point
+errorcode,newgoal_handle=vrep.simxGetObjectHandle(clientID,'goal_new',vrep.simx_opmode_oneshot_wait)
+time.sleep(0.3) 
+errorCode,newgoal_position=vrep.simxGetObjectPosition(clientID,newgoal_handle,-1,vrep.simx_opmode_streaming)
+
+came_from, cost_so_far = a_star_search(grid, (0, 0, 0), newgoal_positon)
+#came_from, cost_so_far = a_star_search(grid, (0, 0, 0), (16, 16, 0))
 
 #this function is need to get the path(in points, nodes) from the results of the pathfinding algorythm
 def reconstruct_path(came_from, start, goal):
@@ -163,7 +170,8 @@ def reconstruct_path(came_from, start, goal):
     return path
 
 #use the reconstruct function to get the path
-path2=reconstruct_path(came_from,(0,0,0),(16,16,0))
+path2=reconstruct_path(came_from,(0,0,0),newgoal_position)
+#path2=reconstruct_path(came_from,(0,0,0),(16,16,0))
 
 #need to control the quadrocopter later, by just moving away the target slowly
 errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
