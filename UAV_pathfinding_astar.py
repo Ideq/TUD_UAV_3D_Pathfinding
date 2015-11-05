@@ -16,22 +16,32 @@ import collections #needed for the queue
 import heapq#needed for the queue
 
 def search(goal,start,search_type,interpolation,mapdata):
+    global mapdata2
+    mapdata2=mapdata
+    goal2=m_to_grid(goal)
+    start2=m_to_grid(start)
     (x,y,z)=mapdata.shape
+    #print x,y,z
     grid=SquareGrid(x,y,z)
     if search_type=="astar":
-        came_from, cost_so_far = a_star_search(grid, start, goal) 
-        path=reconstruct_path(came_from,start,goal)
-        
-    else:
-    
+        came_from, cost_so_far = a_star_search(grid, start2, goal2,mapdata) 
+        print goal2, start2
+        path=reconstruct_path(came_from,start2,goal2)
     path=interpolation_skip_points(path)
     path=interpolation_polynom(path,interpolation)
-    
+    #print path
     return path
+    #return
     
-    
-    
-    
+def m_to_grid(point):   
+    xm=point[0]
+    ym=point[1]
+    zm=point[2]
+    xgrid=int(round(xm/0.4-1,0))
+    ygrid=int(round(ym/0.4-1,0))
+    zgrid=int(round(zm/0.4-1,0))
+    point=(xgrid,ygrid,zgrid)
+    return point
 #interpolation
 #1. step elimination of unnecessary nodes in the path, makes the path shorter, because of more direct movements       
 def interpolation_skip_points(path):
@@ -39,12 +49,14 @@ def interpolation_skip_points(path):
     while in_progress>0:
         in_progress=0
         i=0
-        while i <(len(path)-2):
-            if collision(path[i],path[i+2]):
-                path.pop(i+1)
-                in_progress=1
-            i=i+1
-    return
+        if len(path)>2:
+            while i <(len(path)-2):
+                if collision(path[i],path[i+2]):
+                    path.pop(i+1)
+                    in_progress=1
+                i=i+1
+                #print path
+    return path
 
  #2. step interpolate the remainging corner points of the path by using different degrees of polynoms
 def interpolation_polynom(path,grad):
@@ -59,15 +71,15 @@ def interpolation_polynom(path,grad):
     data = data.transpose()
     #interpolate polynom degree 1
     if grad==1:
-        tck, u= interpolate.splprep(data,k=1,s=0.1)
+        tck, u= interpolate.splprep(data,k=1,s=0.01)
         path = interpolate.splev(np.linspace(0,1,100), tck)
     #interpolate polynom degree 2
     if grad==2:
-        tck, u= interpolate.splprep(data,k=2,s=0.1)
+        tck, u= interpolate.splprep(data,k=2,s=0.01)
         path = interpolate.splev(np.linspace(0,1,100), tck)
     #interpolate polynom degree 3
     if grad==3:
-        tck, u= interpolate.splprep(data,k=3,s=0.1)
+        tck, u= interpolate.splprep(data,k=3,s=0.01)
         path = interpolate.splev(np.linspace(0,1,100), tck)
     return path
 
@@ -93,7 +105,7 @@ def heuristic(a, b):
     return math.sqrt((x1-x2)**2+(y1-y2)**2+(z1-z2)**2)
 
 #this is the Pathfinding algorythm A*, implemented by using the defined functions and datastructures
-def a_star_search(graph, start, goal):
+def a_star_search(graph, start, goal,mapdata):
     frontier = PriorityQueue()
     frontier.put(start, 0)
     came_from = {}
@@ -107,7 +119,7 @@ def a_star_search(graph, start, goal):
         if current == goal:
             
             break
-        for next in graph.neighbors(current):
+        for next in graph.neighbors(current,mapdata):
             
             new_cost = cost_so_far[current] + graph.cost(current, next)
             if next not in cost_so_far or new_cost < cost_so_far[next]:
@@ -140,7 +152,7 @@ class SquareGrid:
     def passable(self, id):
         (x,y,z)=id
         #arr[] is an array with the information about the obstacles in the area, filled by sensor information
-        if mapdata[x,y,z]==0:
+        if mapdata2[x,y,z]==0:
             boolean=3
         else:
             boolean=2
@@ -154,7 +166,7 @@ class SquareGrid:
 #        results = filter(self.in_bounds, results)
 #        results = filter(self.passable, results)
 #        return results
-    def neighbors(self, id):
+    def neighbors(self, id,mapdata):
         (x, y, z) = id
         results = [(x+1, y, z), (x, y-1, z), (x-1, y, z), (x, y+1, z),(x, y, z+1),(x, y, z-1)]
         results = filter(self.in_bounds, results)
@@ -162,6 +174,7 @@ class SquareGrid:
         return results
 
 def collision(a,b):
+    #print a,b
     (x1,y1,z1)=a
     (x2,y2,z2)=b
     out=0;
@@ -174,7 +187,7 @@ def collision(a,b):
         x=round(x,0)
         y=round(y,0)
         z=round(z,0)
-        out=out+arr[x,y,z]
+        out=out+mapdata2[x,y,z]
     #returns only true, if all nodes checked in the array returned the value 0 which means no obstacle
     return out==0
 
@@ -192,6 +205,7 @@ def collision(a,b):
 #this function is need to get the path(in points, nodes) from the results of the pathfinding algorythm
 def reconstruct_path(came_from, start, goal):
     current = goal
+    #print current
     path = [current]
     while current != start:
         current = came_from[current]
@@ -204,4 +218,3 @@ def reconstruct_path(came_from, start, goal):
 
 #need to control the quadrocopter later, by just moving away the target slowly
 #errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
-
