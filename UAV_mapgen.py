@@ -13,7 +13,7 @@ import time
 import math
 #from scipy import interpolate
 from copy import deepcopy
-
+import os.path
 
 #clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5)
 def save(mapdata2):
@@ -26,8 +26,13 @@ def save(mapdata2):
                     print 'check'
     return mapdata3
 
+
+
+
 def mapgen(scene_name,x,y,z,clientID):
-    if scene_name=="testroom":
+    if os.path.isfile('./Mapdata/'+ scene_name +'.npy'):
+        arr=np.load('./Mapdata/'+ scene_name +'.npy')
+    else:
         errorCode,sensor1=vrep.simxGetObjectHandle(clientID,'Sensor_1',vrep.simx_opmode_oneshot_wait)
         errorCode,detectionState,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor1,vrep.simx_opmode_streaming)            
 
@@ -66,6 +71,7 @@ def mapgen(scene_name,x,y,z,clientID):
                     else:
                         arr[index,index2,index3]=0 
             #time.sleep(0.2)
+        np.save('./Mapdata/'+scene_name, np.ndarray(arr))
     return arr
     
 #mapgen("testroom",12,12,4,clientID)

@@ -6,6 +6,7 @@ Created on Fri Oct 30 00:17:18 2015
 """
 
 #import from Libaries which are usefull
+from __future__ import division
 import vrep#needed for the Connection with the Simulator
 import sys
 import numpy as np#needed for the arrays and some other mathematical operations
@@ -14,6 +15,7 @@ import math
 from scipy import interpolate#needed for the interpolation functions
 import collections #needed for the queue       
 import heapq#needed for the queue
+
 
 def search(goal,start,search_type,interpolation,mapdata):
     global mapdata2
@@ -28,6 +30,7 @@ def search(goal,start,search_type,interpolation,mapdata):
         print goal2, start2
         path=reconstruct_path(came_from,start2,goal2)
     path=interpolation_skip_points(path)
+    print path
     path=interpolation_polynom(path,interpolation)
     #print path
     return path
@@ -71,15 +74,15 @@ def interpolation_polynom(path,grad):
     data = data.transpose()
     #interpolate polynom degree 1
     if grad==1:
-        tck, u= interpolate.splprep(data,k=1,s=0.01)
+        tck, u= interpolate.splprep(data,k=1,s=10)
         path = interpolate.splev(np.linspace(0,1,100), tck)
     #interpolate polynom degree 2
     if grad==2:
-        tck, u= interpolate.splprep(data,k=2,s=0.01)
+        tck, u= interpolate.splprep(data,k=2,s=10)
         path = interpolate.splev(np.linspace(0,1,100), tck)
     #interpolate polynom degree 3
     if grad==3:
-        tck, u= interpolate.splprep(data,k=3,s=0.01)
+        tck, u= interpolate.splprep(data, w=None, u=None, ub=None, ue=None, k=3, task=0, s=None, t=None, full_output=0, nest=None, per=0, quiet=1)
         path = interpolate.splev(np.linspace(0,1,100), tck)
     return path
 
@@ -174,20 +177,21 @@ class SquareGrid:
         return results
 
 def collision(a,b):
-    #print a,b
+    print a,b
     (x1,y1,z1)=a
     (x2,y2,z2)=b
     out=0;
     #straight line between the 2 nodes, 1000 points in between are calculated
     for l in range(1000):
         x=x1+(x2-x1)*(l+1)/1000
-        y=y1+(y2-y1)*(l+1)/1000     
+        y=y1+(y2-y1)*(l+1)/1000 
         z=z1+(z2-z1)*(l+1)/1000       
         #round the result to get the array indexs 
         x=round(x,0)
         y=round(y,0)
         z=round(z,0)
         out=out+mapdata2[x,y,z]
+    print out
     #returns only true, if all nodes checked in the array returned the value 0 which means no obstacle
     return out==0
 

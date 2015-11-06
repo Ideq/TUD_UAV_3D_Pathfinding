@@ -84,3 +84,18 @@ def showPath(clientID,qubic,color):
         vrep.simxSetObjectPosition (clientID,Arro,-1,(0,0,0),vrep.simx_opmode_oneshot)
         returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[angle_calculationx([0,bdiff,cdiff],[0,0,-1]),-angle_calculationy([0,bdiff,cdiff],[adiff,bdiff,cdiff]),0],vrep.simx_opmode_oneshot) #winkel_berechnen([0,bdiff,cdiff],[adiff,bdiff,cdiff])
         vrep.simxSetObjectPosition (clientID,Arro,-1,(x,y,z),vrep.simx_opmode_oneshot)  
+        
+def followPath(clientID,path):
+    errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
+    for next in range(100):
+        a=path[0]
+        b=path[1]
+        c=path[2]
+        a2=a[next]
+        b2=b[next]
+        c2=c[next]
+        x=round(0.4+0.4*a2,2)
+        y=round(0.2+0.4*b2,2)
+        z=round(0.3+0.4*c2,2)
+        vrep.simxSetObjectPosition (clientID,UAV,-1,(x,y,z),vrep.simx_opmode_oneshot)
+        time.sleep(0.3)
