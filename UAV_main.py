@@ -12,6 +12,13 @@ import UAV_pathfinding_astar
 import UAV_VREP
 import numpy as np
 import time
+import pathfollowing
+from PathGenerationCubic import path_3d
+from FieldGeneration import calc_vec_field_fast
+from mayavi import mlab
+from pylab import array
+from UAV_pathfinding_astar import m_to_grid
+from pathfollowing import findnearst
 #start Connection to V-REP
 vrep.simxFinish(-1) # just in case, close all opened connections
 clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
@@ -66,3 +73,32 @@ UAV_VREP.showPath(clientID,path,1)
         #input
             #path
 UAV_VREP.followPath(clientID,path)
+
+#start2=m_to_grid(start_position)
+#goal2=m_to_grid(goal_position)
+#Pos0 = array([4, 8, 3])
+#Pos1 = array([14, 12, 17])
+#Pos2 = array([14, 4, 17])
+Loop = False
+#Pos = array([Pos0, Pos1, Pos2])
+
+# We obtain a path from a set of discrete points using
+# Cubic splines
+
+#X, Y, Z, Tt = path_3d(Pos, Loop)
+X, Y, Z, Tt = path_3d(np.transpose(path), Loop)
+# Now we calculate the vector field using the provided functions
+
+vector_field_3D, Xc, Yc, Zc = calc_vec_field_fast(X, Y, Z, 30, 1)
+
+
+# We plot
+"""mlab.figure(size=(800, 600))
+mlab.flow(Xc, Yc, Zc, vector_field_3D[0], vector_field_3D[1], vector_field_3D[2], linetype='tube', seedtype='plane')
+mlab.pipeline.vector_field(Xc, Yc, Zc, vector_field_3D[0], vector_field_3D[1], vector_field_3D[2], name='vector field')
+mlab.points3d(X, Y, Z, Tt)
+mlab.quiver3d(Xc, Yc, Zc, vector_field_3D[0], vector_field_3D[1], vector_field_3D[2])
+mlab.show()
+"""
+position=[1,2,3]
+v_result=findnearst(position, path)
