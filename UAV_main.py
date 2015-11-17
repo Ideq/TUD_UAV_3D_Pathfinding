@@ -49,6 +49,7 @@ print start_position
 start_time = time.time()
 path=UAV_pathfinding_astar.search(goal_position,start_position,"astar",3,mapdata)
 print("--- %s seconds ---" % (time.time() - start_time))
+print path
     #function
         #input
             #goal_position, start_position, type of algorythm(A* or RRT), type of interpolation(1=linear, 2=quadratic, 3=qubic)
@@ -59,10 +60,10 @@ print("--- %s seconds ---" % (time.time() - start_time))
     #function, creates an arrow an every point of the path pointing to the next point
         #input 
             #path, color(1=green,2=yewllow,3=red)
-UAV_VREP.showPath(clientID,path,1)
+#UAV_VREP.showPath(clientID,path,1)
 
 #Path following
     #function
         #input
             #path
-UAV_VREP.followPath(clientID,path)
+#UAV_VREP.followPath(clientID,path)
