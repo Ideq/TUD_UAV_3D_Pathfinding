@@ -4,11 +4,9 @@ Created on Mon Nov 16 21:00:37 2015
 
 @author: renchen
 """
-#from scipy import spatial
 import numpy as np
-#import math
+
 def  findnearst(position, path):
-#     for i in range(len(path)):
          x=path[0]
          y=path[1]
          z=path[2]
