@@ -36,7 +36,7 @@ def search(goal,start,search_type,interpolation,mapdata):
         #print path
     #path=interpolation_skip_points(path)
     #print path
-    #path=interpolation_polynom(path,interpolation)
+    path=interpolation_polynom(path,interpolation)
     #print path
     return path
     #return
@@ -60,8 +60,9 @@ def interpolation_skip_points(path):
         if len(path)>2:
             while i <(len(path)-2):
                 if collision(path[i],path[i+2]):
-                    path.pop(i+1)
-                    in_progress=1
+                    if distance(path[i],path[i+2])<4:
+                        path.pop(i+1)
+                        in_progress=1   
                 i=i+1
                 #print path
     return path
@@ -87,7 +88,7 @@ def interpolation_polynom(path,grad):
         path = interpolate.splev(np.linspace(0,1,100), tck)
     #interpolate polynom degree 3
     if grad==3:
-        tck, u= interpolate.splprep(data, w=None, u=None, ub=None, ue=None, k=3, task=0, s=None, t=None, full_output=0, nest=None, per=0, quiet=1)
+        tck, u= interpolate.splprep(data, w=None, u=None, ub=None, ue=None, k=3, task=0, s=0.3, t=None, full_output=0, nest=None, per=0, quiet=1)
         path = interpolate.splev(np.linspace(0,1,100), tck)
     return path
 

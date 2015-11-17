@@ -85,6 +85,7 @@ def mapgen_fast(scene_name,x,y,z,clientID):
     for x in range(10):
         for y in range(10):
             returnCode,new_sensor_handle=vrep.simxCopyPasteObjects(clientID,objectHandles,vrep.simx_opmode_oneshot_wait)
+            vrep.simxReadProximitySensor(clientID,new_sensor_handle[0],vrep.simx_opmode_streaming)
             sensor_data[x,y]=new_sensor_handle[0]
             x1=0.4+x*0.4
             y1=0.2+y*0.4
@@ -99,17 +100,21 @@ def mapgen_fast(scene_name,x,y,z,clientID):
     xmax=int(math.ceil(xmax))
     ymax=int(math.ceil(ymax))
     zmax=int(math.ceil(zmax))
-    arr=np.ndarray(shape=(xmax*10,ymax*10,zmax),dtype=int)
+    print xmax,ymax,zmax
+    arr=np.zeros(shape=(xmax*10,ymax*10,zmax),dtype=int)
     for index in range(xmax):
         for index2 in range(ymax):
             for index3 in range(zmax):
+                print index,index2,index3
                 for x in range(10):
                     for y in range(10):
                         errorCode,detectionState1,detectedPoint,detectedObjectHandle,detectedSurfaceNormalVector=vrep.simxReadProximitySensor (clientID,sensor_data[x,y],vrep.simx_opmode_buffer) 
-                        if (detectionState1):            
-                            arr[index+x,index2+y,index3]=1   #Ergebnis speichern
+                        print sensor_data[x,y]                        
+                        if (detectionState1):
+                            print "TEST"
+                            arr[index*10+x,index2*10+y,index3]=1   #Ergebnis speichern
                         else:
-                            arr[index+x,index2+y,index3]=0                
+                            arr[index*10+x,index2*10+y,index3]=0                
                 for x in range(10):
                     for y in range(10):
                         x1=0.4+4*(index)+x*0.4
@@ -158,3 +163,4 @@ def mapgen_fast(scene_name,x,y,z,clientID):
 #                        arr[index,index2,index3]=0 
 #            #time.sleep(0.2)
 #    return arr
+    

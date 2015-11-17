@@ -13,12 +13,11 @@ import UAV_VREP
 import numpy as np
 import time
 import pathfollowing
-from PathGenerationCubic import path_3d
-from FieldGeneration import calc_vec_field_fast
-from mayavi import mlab
-from pylab import array
-from UAV_pathfinding_astar import m_to_grid
-from pathfollowing import findnearst
+#from PathGenerationCubic import path_3d
+#from FieldGeneration import calc_vec_field_fast
+#from mayavi import mlab
+#from pylab import array
+
 #start Connection to V-REP
 vrep.simxFinish(-1) # just in case, close all opened connections
 clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
@@ -54,7 +53,7 @@ print start_position
              
 #Start pathfinding
 start_time = time.time()
-path=UAV_pathfinding_astar.search(goal_position,start_position,"astar",3,mapdata)
+path=UAV_pathfinding_astar.search(goal_position,start_position,"rrt",3,mapdata)
 print("--- %s seconds ---" % (time.time() - start_time))
 print path
     #function
@@ -67,14 +66,14 @@ print path
     #function, creates an arrow an every point of the path pointing to the next point
         #input 
             #path, color(1=green,2=yewllow,3=red)
-#UAV_VREP.showPath(clientID,path,1)
-
+UAV_VREP.showPath(clientID,path,1)
+#UAV_VREP.show_path2(path,clientID)
 #Path following
     #function
         #input
             #path
-<<<<<<< HEAD
-UAV_VREP.followPath(clientID,path)
+
+#UAV_VREP.followPath(clientID,path)
 
 #start2=m_to_grid(start_position)
 #goal2=m_to_grid(goal_position)
@@ -87,11 +86,11 @@ Loop = False
 # We obtain a path from a set of discrete points using
 # Cubic splines
 
-#X, Y, Z, Tt = path_3d(Pos, Loop)
-X, Y, Z, Tt = path_3d(np.transpose(path), Loop)
-# Now we calculate the vector field using the provided functions
-
-vector_field_3D, Xc, Yc, Zc = calc_vec_field_fast(X, Y, Z, 30, 1)
+##X, Y, Z, Tt = path_3d(Pos, Loop)
+#X, Y, Z, Tt = path_3d(np.transpose(path), Loop)
+## Now we calculate the vector field using the provided functions
+#
+#vector_field_3D, Xc, Yc, Zc = calc_vec_field_fast(X, Y, Z, 30, 1)
 
 
 # We plot
@@ -102,8 +101,7 @@ mlab.points3d(X, Y, Z, Tt)
 mlab.quiver3d(Xc, Yc, Zc, vector_field_3D[0], vector_field_3D[1], vector_field_3D[2])
 mlab.show()
 """
-position=[1,2,3]
-v_result=findnearst(position, path)
-=======
-#UAV_VREP.followPath(clientID,path)
->>>>>>> origin/divide-code
+#position=[1,2,3]
+#v_result=findnearst(position, path)
+
+
