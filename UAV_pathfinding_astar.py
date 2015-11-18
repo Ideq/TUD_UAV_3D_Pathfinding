@@ -16,7 +16,7 @@ from scipy import interpolate#needed for the interpolation functions
 import collections #needed for the queue       
 import heapq#needed for the queue
 import random
-
+from copy import deepcopy
 
 def search(goal,start,search_type,interpolation,mapdata):
     global mapdata2
@@ -34,7 +34,7 @@ def search(goal,start,search_type,interpolation,mapdata):
         path = rrt_search(grid, start2, goal2, mapdata) 
         #print goal2, start2
         #print path
-    #path=interpolation_skip_points(path)
+    path=interpolation_skip_points(path)
     #print path
     path=interpolation_polynom(path,interpolation)
     #print path
@@ -60,11 +60,30 @@ def interpolation_skip_points(path):
         if len(path)>2:
             while i <(len(path)-2):
                 if collision(path[i],path[i+2]):
-                    if distance(path[i],path[i+2])<4:
-                        path.pop(i+1)
-                        in_progress=1   
+                    #if distance(path[i],path[i+2])<4:
+                    path.pop(i+1)
+                    in_progress=1   
                 i=i+1
                 #print path
+    path2=deepcopy(path)
+    n=0
+    count_points=0
+    while n < (len(path2)-1):
+        if distance(path2[n],path2[n+1])>1:
+            dis=distance(path2[n],path2[n+1])
+            anzahl=int(round(dis,0)-1)
+            (x1,y1,z1)=path2[n]
+            (x2,y2,z2)=path2[n+1]
+            print dis,anzahl
+            for m in range(1,anzahl):
+                x=x1+(x2-x1)*m/anzahl
+                y=y1+(y2-y1)*m/anzahl
+                z=z1+(z2-z1)*m/anzahl
+                new_point=(x,y,z)
+                path.insert(n+m+count_points, new_point)
+            count_points=count_points+anzahl-1
+            print count_points
+        n=n+1
     return path
 
  #2. step interpolate the remainging corner points of the path by using different degrees of polynoms
@@ -81,15 +100,15 @@ def interpolation_polynom(path,grad):
     #interpolate polynom degree 1
     if grad==1:
         tck, u= interpolate.splprep(data,k=1,s=10)
-        path = interpolate.splev(np.linspace(0,1,100), tck)
+        path = interpolate.splev(np.linspace(0,1,200), tck)
     #interpolate polynom degree 2
     if grad==2:
         tck, u= interpolate.splprep(data,k=2,s=10)
-        path = interpolate.splev(np.linspace(0,1,100), tck)
+        path = interpolate.splev(np.linspace(0,1,200), tck)
     #interpolate polynom degree 3
     if grad==3:
         tck, u= interpolate.splprep(data, w=None, u=None, ub=None, ue=None, k=3, task=0, s=0.3, t=None, full_output=0, nest=None, per=0, quiet=1)
-        path = interpolate.splev(np.linspace(0,1,100), tck)
+        path = interpolate.splev(np.linspace(0,1,200), tck)
     return path
 
 #this queue structure is needed for the A* algorythm and the difference to the Dijkstra algorythm, which would return the same result, but normally needs more time

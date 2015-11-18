@@ -12,7 +12,8 @@ import math
 from scipy import interpolate#needed for the interpolation functions
 import collections #needed for the queue       
 import heapq#needed for the queue
-
+import pathfollowing
+import UAV_pathfinding_astar
 
 #vrep.simxFinish(-1)
 #clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
@@ -57,14 +58,14 @@ def showPath(clientID,qubic,color):
     errorCode,Arrow=vrep.simxGetObjectHandle(clientID,'Arrow3',vrep.simx_opmode_oneshot_wait)
     objectHandles=np.array([Arrow])
     #put arrows on every point the trajectory pointing in the direction of the next point
-    for next in range(100):
+    for next in range(200):
         a1=qubic[0]
         b1=qubic[1]
         c1=qubic[2]
         a=a1[next]
         b=b1[next]
         c=c1[next]
-        if next<99:
+        if next<199:
             a2=a1[next+1]
             b2=b1[next+1]
             c2=c1[next+1]
@@ -99,7 +100,7 @@ def show_path2(path2,clientID):
         
 def followPath(clientID,path):
     errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
-    for next in range(100):
+    for next in range(200):
         a=path[0]
         b=path[1]
         c=path[2]
@@ -111,3 +112,29 @@ def followPath(clientID,path):
         z=round(0.3+0.4*c2,2)
         vrep.simxSetObjectPosition (clientID,UAV,-1,(x,y,z),vrep.simx_opmode_oneshot)
         time.sleep(0.3)
+        
+def followPath2(clientID,path,goal):
+    errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV',vrep.simx_opmode_oneshot_wait)
+    goal=UAV_pathfinding_astar.m_to_grid(goal)
+    (xgoal,ygoal,zgoal)=goal
+    pos=getPosition(clientID,'UAV')
+    pos=UAV_pathfinding_astar.m_to_grid(pos)
+    (xPosition,yPosition,zPosition)=pos
+    xvelomax=1
+    yvelomax=1
+    zvelomax=1
+    while (xPosition > xgoal+0.05) or (xPosition < xgoal-0.05) or (yPosition > ygoal+0.05) or (yPosition < ygoal-0.05) or (zPosition > zgoal+0.05) or (zPosition < zgoal-0.05):
+        pos=getPosition(clientID,'UAV')
+        pos=UAV_pathfinding_astar.m_to_grid(pos)
+        (xPosition,yPosition,zPosition)=pos        
+        vec=pathfollowing.findnearst(pos,path) 
+        if abs(vec[0])>0.01:
+            xvelo=xvelomax*0.8
+        if abs(vec[1])>0.01:
+            yvelo=yvelomax*0.8
+        if abs(vec[2])>0.01:
+            zvelo=zvelomax*0.8
+        returnCode=vrep.simxSetJointTargetVelocity(clientID,UAV,xvelo+yvelo+zvelo,vrep.simx_opmode_oneshot)
+        time.sleep(0.2)
+        
+    
