@@ -23,8 +23,8 @@ vrep.simxFinish(-1) # just in case, close all opened connections
 clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
 
 #generate mapdata, load data if mapdata for scene exist not implemented till now   
-mapdata=UAV_mapgen.mapgen_fast("hexagon",32,32,10,clientID)
-#mapdata=UAV_mapgen.mapgen_fast("testroom111",12,12,4,clientID)
+#mapdata=UAV_mapgen.mapgen_fast("hexagon",32,32,10,clientID)
+mapdata=UAV_mapgen.mapgen("testroom111",12,12,4,clientID)
    
 
 #Get goal-data from V-REP
@@ -43,7 +43,8 @@ print start_position
 #Start pathfinding
 print "start pathfinding"
 start_time = time.time()
-path=UAV_pathfinding_astar.search(goal_position,start_position,"rrt",3,mapdata)
+path=UAV_pathfinding_astar.search(goal_position,start_position,"astar",3,mapdata)
+#path=UAV_pathfinding_astar.search(goal_position,start_position,"rrt",3,mapdata)
 print("--- %s seconds ---" % (time.time() - start_time))
 #print path
     #function

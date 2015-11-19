@@ -74,7 +74,7 @@ def interpolation_skip_points(path):
             anzahl=int(round(dis,0)-1)
             (x1,y1,z1)=path2[n]
             (x2,y2,z2)=path2[n+1]
-            print dis,anzahl
+            #print dis,anzahl
             for m in range(1,anzahl):
                 x=x1+(x2-x1)*m/anzahl
                 y=y1+(y2-y1)*m/anzahl
@@ -82,7 +82,7 @@ def interpolation_skip_points(path):
                 new_point=(x,y,z)
                 path.insert(n+m+count_points, new_point)
             count_points=count_points+anzahl-1
-            print count_points
+            #print count_points
         n=n+1
     return path
 
