@@ -34,9 +34,15 @@ def search(goal,start,search_type,interpolation,mapdata):
         path = rrt_search(grid, start2, goal2, mapdata) 
         #print goal2, start2
         #print path
+    print path
     path=interpolation_skip_points(path)
-    #print path
+    print path
+    path=path_grid_to_m(path,start,goal)
+    
+    
+    
     path=interpolation_polynom(path,interpolation)
+    #print path
     #print path
     return path
     #return
@@ -64,7 +70,7 @@ def interpolation_skip_points(path):
                     path.pop(i+1)
                     in_progress=1   
                 i=i+1
-                #print path
+    print path
     path2=deepcopy(path)
     n=0
     count_points=0
@@ -74,40 +80,64 @@ def interpolation_skip_points(path):
             anzahl=int(round(dis,0)-1)
             (x1,y1,z1)=path2[n]
             (x2,y2,z2)=path2[n+1]
-            #print dis,anzahl
-            for m in range(1,anzahl):
-                x=x1+(x2-x1)*m/anzahl
-                y=y1+(y2-y1)*m/anzahl
-                z=z1+(z2-z1)*m/anzahl
-                new_point=(x,y,z)
-                path.insert(n+m+count_points, new_point)
-            count_points=count_points+anzahl-1
-            #print count_points
+            if anzahl>0:            
+                print dis,anzahl
+                for m in range(1,anzahl):
+                    x=x1+(x2-x1)*m/anzahl
+                    y=y1+(y2-y1)*m/anzahl
+                    z=z1+(z2-z1)*m/anzahl
+                    new_point=(x,y,z)
+                    path.insert(n+m+count_points, new_point)
+                count_points=count_points+anzahl-1
+            print path
         n=n+1
     return path
 
- #2. step interpolate the remainging corner points of the path by using different degrees of polynoms
-def interpolation_polynom(path,grad):
-    data=np.ndarray(shape=(len(path),3),dtype=float)   #create an array of float type for the input points
-    #fill the array with the Pathdata
-    for i in range(len(path)):
-        (x,y,z)=path[i]
-        data[i,0]=x
-        data[i,1]=y
-        data[i,2]=z
+#change grid coordinates to m in world coordinate system
+def path_grid_to_m(path,start,goal):
+    data=np.ndarray(shape=(len(path)+2,3),dtype=float)
+    for next in range(len(path)):
+        (x,y,z)=path[next]
+        data[next+1,0]=x*0.4+0.4
+        data[next+1,1]=y*0.4+0.2
+        data[next+1,2]=z*0.4+0.3  
+    (sx,sy,sz)=start
+    data[0,0]=sx
+    data[0,1]=sy
+    data[0,2]=sz
+    (gx,gy,gz)=goal
+    data[len(path)+1,0]=gx
+    data[len(path)+1,1]=gy
+    data[len(path)+1,2]=gz
     #arrange the data to use the function
     data = data.transpose()
+    #print data
+    return data
+
+ #2. step interpolate the remainging corner points of the path by using different degrees of polynoms
+def interpolation_polynom(path,grad):
+#    data=np.ndarray(shape=(len(path),3),dtype=float)   #create an array of float type for the input points
+#    #fill the array with the Pathdata
+#    a=path[0]
+#    b=path[1]
+#    c=path[2]
+#    for i in range(len(a)):
+#        data[i,0]=a[i]
+#        data[i,1]=b[i]
+#        data[i,2]=c[i]
+#    #arrange the data to use the function
+#    data = data.transpose()
     #interpolate polynom degree 1
     if grad==1:
-        tck, u= interpolate.splprep(data,k=1,s=10)
+        tck, u= interpolate.splprep(path,k=1,s=10)
         path = interpolate.splev(np.linspace(0,1,200), tck)
     #interpolate polynom degree 2
     if grad==2:
-        tck, u= interpolate.splprep(data,k=2,s=10)
+        tck, u= interpolate.splprep(path,k=2,s=10)
         path = interpolate.splev(np.linspace(0,1,200), tck)
     #interpolate polynom degree 3
     if grad==3:
-        tck, u= interpolate.splprep(data, w=None, u=None, ub=None, ue=None, k=3, task=0, s=0.3, t=None, full_output=0, nest=None, per=0, quiet=1)
+        tck, u= interpolate.splprep(path, w=None, u=None, ub=None, ue=None, k=3, task=0, s=0.3, t=None, full_output=0, nest=None, per=0, quiet=1)
         path = interpolate.splev(np.linspace(0,1,200), tck)
     return path
 

@@ -21,7 +21,10 @@ import pathfollowing
 #start Connection to V-REP
 vrep.simxFinish(-1) # just in case, close all opened connections
 clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
-
+data=[0,0,1,0,0,0]
+packedData=vrep.simxPackFloats(data)
+vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
+vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
 #generate mapdata, load data if mapdata for scene exist not implemented till now   
 #mapdata=UAV_mapgen.mapgen_fast("hexagon",32,32,10,clientID)
 mapdata=UAV_mapgen.mapgen("testroom111",12,12,4,clientID)
@@ -64,8 +67,8 @@ UAV_VREP.showPath(clientID,path,1)
         #input
             #path
 
-UAV_VREP.followPath(clientID,path)
-#UAV_VREP.followPath2(clientID,path,goal_position)
+#UAV_VREP.followPath(clientID,path)
+UAV_VREP.followPath2(clientID,path,goal_position)
 #start2=m_to_grid(start_position)
 #goal2=m_to_grid(goal_position)
 #Pos0 = array([4, 8, 3])
