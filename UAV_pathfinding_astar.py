@@ -34,9 +34,9 @@ def search(goal,start,search_type,interpolation,mapdata):
         path = rrt_search(grid, start2, goal2, mapdata) 
         #print goal2, start2
         #print path
-    print path
+    #print path
     path=interpolation_skip_points(path)
-    print path
+    #print path
     path=path_grid_to_m(path,start,goal)
     
     

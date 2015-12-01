@@ -106,8 +106,8 @@ def followPath2(clientID,path,goal):
     pathy=path[1]
     pathz=path[2]
     errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV',vrep.simx_opmode_oneshot_wait)
-    goal=UAV_pathfinding_astar.m_to_grid(goal)
-    (xgoal,ygoal,zgoal)=goal
+    #goal=UAV_pathfinding_astar.m_to_grid(goal)
+    #(xgoal,ygoal,zgoal)=goal
     errorCode,pos=vrep.simxGetObjectPosition(clientID,UAV,-1,vrep.simx_opmode_streaming)
     errorCode,orientation=vrep.simxGetObjectOrientation(clientID,UAV,-1,vrep.simx_opmode_streaming)
     time.sleep(0.1) 
@@ -118,12 +118,12 @@ def followPath2(clientID,path,goal):
     xPosition=pos[0]
     yPosition=pos[1]
     zPosition=pos[2]
-    xvelomax=0.45
-    yvelomax=0.45
+    xvelomax=0.8
+    yvelomax=0.8
     zmax=1
     vecp=[0,0,0]
     while (xPosition > pathx[199]+0.2) or (xPosition < pathx[199]-0.2) or (yPosition > pathy[199]+0.2) or (yPosition < pathy[199]-0.2) or (zPosition > pathz[199]+0.2) or (zPosition < pathz[199]-0.2):
-        #start_time = time.time()
+        start_time = time.time()
         #pos=getPosition(clientID,'UAV')
         errorCode,pos=vrep.simxGetObjectPosition(clientID,UAV,-1,vrep.simx_opmode_buffer)
         errorCode,orientation=vrep.simxGetObjectOrientation(clientID,UAV,-1,vrep.simx_opmode_buffer)
@@ -131,12 +131,12 @@ def followPath2(clientID,path,goal):
         xPosition=pos[0]
         yPosition=pos[1]
         zPosition=pos[2]       
-        #print("--- %s seconds ---" % (time.time() - start_time))
+        
                
         vec=pathfollowing.findnearst(pos,path)
         #print vec
         #print vecp
-        vecp=vec 
+        #vecp=vec 
         
         absolut=math.sqrt(vec[0]**2+vec[1]**2+vec[2]**2)
         xvelo=0
@@ -162,9 +162,9 @@ def followPath2(clientID,path,goal):
         if ref_angz<0:
             ref_angz=2*np.pi+ref_angz
         if angle>ref_angz:
-            veloz=-2*(angle-ref_angz)/np.pi
+            veloz=-4*(angle-ref_angz)/np.pi
         else:
-            veloz=2*(ref_angz-angle)/np.pi
+            veloz=4*(ref_angz-angle)/np.pi
         #ref_angz=0
         xvelo=xvelo_w*np.cos(-orientation[2])-yvelo_w*np.sin(-orientation[2])
         yvelo=xvelo_w*np.sin(-orientation[2])+yvelo_w*np.cos(-orientation[2])
@@ -174,8 +174,8 @@ def followPath2(clientID,path,goal):
         packedData=vrep.simxPackFloats(data)
         vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
         vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
-        #time.sleep(0.5)
-        
+        time.sleep(0.5)
+        print("--- %s seconds ---" % (time.time() - start_time))
     data=[0,0,height,0,0,0]
     packedData=vrep.simxPackFloats(data)
     vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)

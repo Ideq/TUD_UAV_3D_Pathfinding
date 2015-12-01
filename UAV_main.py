@@ -46,7 +46,7 @@ print start_position
 #Start pathfinding
 print "start pathfinding"
 start_time = time.time()
-path=UAV_pathfinding_astar.search(goal_position,start_position,"astar",3,mapdata)
+path=UAV_pathfinding_astar.search(goal_position,start_position,"rrt",3,mapdata)
 #path=UAV_pathfinding_astar.search(goal_position,start_position,"rrt",3,mapdata)
 print("--- %s seconds ---" % (time.time() - start_time))
 #print path
