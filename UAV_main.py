@@ -26,8 +26,8 @@ packedData=vrep.simxPackFloats(data)
 vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
 vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
 #generate mapdata, load data if mapdata for scene exist not implemented till now   
-#mapdata=UAV_mapgen.mapgen_fast("hexagon",32,32,10,clientID)
-mapdata=UAV_mapgen.mapgen("testroom111",12,12,4,clientID)
+mapdata=UAV_mapgen.mapgen_fast("hexagon",32,32,10,clientID)
+#mapdata=UAV_mapgen.mapgen("testroom111",12,12,4,clientID)
    
 
 #Get goal-data from V-REP
@@ -46,7 +46,7 @@ print start_position
 #Start pathfinding
 print "start pathfinding"
 start_time = time.time()
-path=UAV_pathfinding_astar.search(goal_position,start_position,"rrt",3,mapdata)
+path=UAV_pathfinding_astar.search(goal_position,start_position,"astar",3,mapdata)
 #path=UAV_pathfinding_astar.search(goal_position,start_position,"rrt",3,mapdata)
 print("--- %s seconds ---" % (time.time() - start_time))
 #print path
@@ -60,8 +60,8 @@ print("--- %s seconds ---" % (time.time() - start_time))
     #function, creates an arrow an every point of the path pointing to the next point
         #input 
             #path, color(1=green,2=yewllow,3=red)
-UAV_VREP.showPath(clientID,path,1)
-#UAV_VREP.show_path2(path,clientID)
+#UAV_VREP.showPath(clientID,path,1)
+UAV_VREP.show_path2(path,clientID)
 #Path following
     #function
         #input

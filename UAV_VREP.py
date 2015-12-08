@@ -72,19 +72,31 @@ def showPath(clientID,qubic,color):
         #returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[angle_calculationx([0,bdiff,cdiff],[0,0,-1]),-angle_calculationy([0,bdiff,cdiff],[adiff,bdiff,cdiff]),0],vrep.simx_opmode_oneshot) #winkel_berechnen([0,bdiff,cdiff],[adiff,bdiff,cdiff])
         vrep.simxSetObjectPosition (clientID,Arro,-1,(x,y,z),vrep.simx_opmode_oneshot)  
 
-def show_path2(path2,clientID):
-    errorCode,Ball=vrep.simxGetObjectHandle(clientID,'A_star_points',vrep.simx_opmode_oneshot_wait)
-    objectHandles=np.array([Ball])
-    xpath=path2[0]
-    ypath=path2[1]
-    zpath=path2[2]
-    for next in range(len(xpath)):
-        x=xpath[next]
-        y=ypath[next]
-        z=zpath[next]
-        returnCode,newObjectHandles=vrep.simxCopyPasteObjects(clientID,objectHandles,vrep.simx_opmode_oneshot_wait)
-        Ball_new=newObjectHandles[0]
-        vrep.simxSetObjectPosition (clientID,Ball_new,-1,(x,y,z),vrep.simx_opmode_oneshot)
+def show_path2(path,clientID):
+#    errorCode,Ball=vrep.simxGetObjectHandle(clientID,'A_star_points',vrep.simx_opmode_oneshot_wait)
+#    objectHandles=np.array([Ball])
+#    xpath=path2[0]
+#    ypath=path2[1]
+#    zpath=path2[2]
+#    for next in range(len(xpath)):
+#        x=xpath[next]
+#        y=ypath[next]
+#        z=zpath[next]
+#        returnCode,newObjectHandles=vrep.simxCopyPasteObjects(clientID,objectHandles,vrep.simx_opmode_oneshot_wait)
+#        Ball_new=newObjectHandles[0]
+#        vrep.simxSetObjectPosition (clientID,Ball_new,-1,(x,y,z),vrep.simx_opmode_oneshot)
+    datax=path[0]
+    datay=path[1]
+    dataz=path[2]
+    packedDatax=vrep.simxPackFloats(datax)
+    vrep.simxClearStringSignal(clientID,'Path_Signalx',vrep.simx_opmode_oneshot)
+    vrep.simxSetStringSignal(clientID,'Path_Signalx',packedDatax,vrep.simx_opmode_oneshot)
+    packedDatay=vrep.simxPackFloats(datay)
+    vrep.simxClearStringSignal(clientID,'Path_Signaly',vrep.simx_opmode_oneshot)
+    vrep.simxSetStringSignal(clientID,'Path_Signaly',packedDatay,vrep.simx_opmode_oneshot)
+    packedDataz=vrep.simxPackFloats(dataz)
+    vrep.simxClearStringSignal(clientID,'Path_Signalz',vrep.simx_opmode_oneshot)
+    vrep.simxSetStringSignal(clientID,'Path_Signalz',packedDataz,vrep.simx_opmode_oneshot)
         
 def followPath(clientID,path):
     errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
@@ -118,10 +130,14 @@ def followPath2(clientID,path,goal):
     xPosition=pos[0]
     yPosition=pos[1]
     zPosition=pos[2]
-    xvelomax=0.8
-    yvelomax=0.8
+    xvelomax=0.7
+    yvelomax=0.7
     zmax=1
     vecp=[0,0,0]
+    pdangle=0
+    pveloz=0
+    pangle=0
+    pref_angz=0
     while (xPosition > pathx[199]+0.2) or (xPosition < pathx[199]-0.2) or (yPosition > pathy[199]+0.2) or (yPosition < pathy[199]-0.2) or (zPosition > pathz[199]+0.2) or (zPosition < pathz[199]-0.2):
         start_time = time.time()
         #pos=getPosition(clientID,'UAV')
@@ -161,11 +177,27 @@ def followPath2(clientID,path,goal):
             angle=orientation[2]
         if ref_angz<0:
             ref_angz=2*np.pi+ref_angz
-        if angle>ref_angz:
-            veloz=-4*(angle-ref_angz)/np.pi
+        dangle=angle-ref_angz
+        
+        #if dangle>np.pi:
+            #print dangle
+        if dangle>np.pi:
+            veloz=4*(2*np.pi-dangle)/np.pi
         else:
-            veloz=4*(ref_angz-angle)/np.pi
+            if dangle<-np.pi:
+                veloz=-4*(2*np.pi+dangle)/np.pi
+            else:
+                veloz=-4*(dangle)/np.pi
         #ref_angz=0
+        if dangle-pdangle>1:
+            print pdangle,dangle
+            print pangle,angle
+            print pref_angz,ref_angz
+            print pveloz,veloz
+        pdangle=dangle
+        pveloz=veloz
+        pangle=angle
+        pref_angz=ref_angz
         xvelo=xvelo_w*np.cos(-orientation[2])-yvelo_w*np.sin(-orientation[2])
         yvelo=xvelo_w*np.sin(-orientation[2])+yvelo_w*np.cos(-orientation[2])
         data=[xvelo,yvelo,height,0,0,veloz]
@@ -174,8 +206,8 @@ def followPath2(clientID,path,goal):
         packedData=vrep.simxPackFloats(data)
         vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
         vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
-        time.sleep(0.5)
-        print("--- %s seconds ---" % (time.time() - start_time))
+        #time.sleep(0.5)
+        #print("--- %s seconds ---" % (time.time() - start_time))
     data=[0,0,height,0,0,0]
     packedData=vrep.simxPackFloats(data)
     vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
