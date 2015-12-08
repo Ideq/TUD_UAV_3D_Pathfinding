@@ -133,6 +133,15 @@ def followPath2(clientID,path,goal):
     xvelomax=0.7
     yvelomax=0.7
     zmax=1
+    xp=[]
+    yp=[]
+    zp=[]
+    xpnear=[]
+    ypnear=[]
+    zpnear=[]
+    xerror=[]
+    yerror=[]
+    zerror=[]
     vecp=[0,0,0]
     pdangle=0
     pveloz=0
@@ -148,8 +157,22 @@ def followPath2(clientID,path,goal):
         yPosition=pos[1]
         zPosition=pos[2]       
         
+        xp.append(xPosition)
+        yp.append(yPosition)
+        zp.append(zPosition)
                
-        vec=pathfollowing.findnearst(pos,path)
+        vec,pnear=pathfollowing.findnearst(pos,path)
+        
+        xpnear.append(pnear[0])
+        ypnear.append(pnear[1])
+        zpnear.append(pnear[2])
+        
+        xerror.append(abs(xPosition-pnear[0]))
+        yerror.append(abs(yPosition-pnear[1]))
+        zerror.append(abs(zPosition-pnear[2]))
+        
+        
+        
         #print vec
         #print vecp
         #vecp=vec 
@@ -213,3 +236,20 @@ def followPath2(clientID,path,goal):
     vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
     vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
     
+    
+    xyzparray=np.ndarray(shape=(3,len(xp)),dtype=float)
+    for next in range(len(xp)):
+        xyzparray[0,next]=xp[next]
+        xyzparray[1,next]=yp[next]
+        xyzparray[2,next]=zp[next]
+        
+    xyzneararray=np.ndarray(shape=(3,len(xpnear)),dtype=float)
+    for next in range(len(xpnear)):
+        xyzneararray[0,next]=xpnear[next]
+        xyzneararray[1,next]=ypnear[next]
+        xyzneararray[2,next]=zpnear[next]
+        
+        
+    return xyzparray,xyzneararray
+   
+   

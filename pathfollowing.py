@@ -40,7 +40,7 @@ def  findnearst(position, path):
         #v_result = alfa*v_approx_nor
         v_result = alfa*v_approx
     
-    return v_result
+    return v_result,p_near
 
 
      
