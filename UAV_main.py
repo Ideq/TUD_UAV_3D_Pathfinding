@@ -13,6 +13,8 @@ import UAV_VREP
 import numpy as np
 import time
 import pathfollowing
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 #from PathGenerationCubic import path_3d
 #from FieldGeneration import calc_vec_field_fast
 #from mayavi import mlab
