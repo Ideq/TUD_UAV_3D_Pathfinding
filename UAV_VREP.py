@@ -23,7 +23,7 @@ def getPosition(clientID,goal_new):
     errorcode,newgoal_handle=vrep.simxGetObjectHandle(clientID,goal_new,vrep.simx_opmode_oneshot_wait)
     #time.sleep(1) 
     errorCode,newgoal_position=vrep.simxGetObjectPosition(clientID,newgoal_handle,-1,vrep.simx_opmode_streaming)
-    time.sleep(0.1) 
+    time.sleep(1) 
     errorCode,newgoal_position=vrep.simxGetObjectPosition(clientID,newgoal_handle,-1,vrep.simx_opmode_buffer)
     return newgoal_position
     
@@ -142,12 +142,28 @@ def followPath2(clientID,path,goal):
     xerror=[]
     yerror=[]
     zerror=[]
+
     vecp=[0,0,0]
     pdangle=0
     pveloz=0
     pangle=0
     pref_angz=0
-    while (xPosition > pathx[199]+0.2) or (xPosition < pathx[199]-0.2) or (yPosition > pathy[199]+0.2) or (yPosition < pathy[199]-0.2) or (zPosition > pathz[199]+0.2) or (zPosition < pathz[199]-0.2):
+    while (xPosition > pathx[199]+0.1) or (xPosition < pathx[199]-0.1) or (yPosition > pathy[199]+0.1) or (yPosition < pathy[199]-0.1) or (zPosition > pathz[199]+0.1) or (zPosition < pathz[199]-0.1):
+        xvelomax=0.6
+        yvelomax=0.6
+        zmax=1
+        absolut_dis=math.sqrt((xPosition-pathx[199])**2+(yPosition-pathy[199])**2+(zPosition-pathz[199])**2)
+        #print absolut_dis
+        slowvelo_dis=4
+        if absolut_dis < slowvelo_dis:
+            xvelomax=xvelomax*absolut_dis/slowvelo_dis
+            yvelomax=yvelomax*absolut_dis/slowvelo_dis
+            #zmax=zmax*absolut_dis/slowvelo_dis
+            
+            print xvelomax
+            print yvelomax
+            print zmax   
+            
         start_time = time.time()
         #pos=getPosition(clientID,'UAV')
         errorCode,pos=vrep.simxGetObjectPosition(clientID,UAV,-1,vrep.simx_opmode_buffer)
@@ -205,12 +221,12 @@ def followPath2(clientID,path,goal):
         #if dangle>np.pi:
             #print dangle
         if dangle>np.pi:
-            veloz=4*(2*np.pi-dangle)/np.pi
+            veloz=6*(2*np.pi-dangle)/np.pi
         else:
             if dangle<-np.pi:
-                veloz=-4*(2*np.pi+dangle)/np.pi
+                veloz=-6*(2*np.pi+dangle)/np.pi
             else:
-                veloz=-4*(dangle)/np.pi
+                veloz=-6*(dangle)/np.pi
         #ref_angz=0
         if dangle-pdangle>1:
             print pdangle,dangle

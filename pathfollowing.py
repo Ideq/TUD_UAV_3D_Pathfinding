@@ -35,7 +35,7 @@ def  findnearst(position, path):
         #v_result = alfa*v_approx_nor + beta*v_tangent_nor
         v_result = alfa*v_approx + beta*v_tangent
     else:
-        alfa=0.5     # 0<alfa<1  self defination
+        alfa=1     # 0<alfa<1  self defination
         #beta=15     # 0<beta<1  self defination
         #v_result = alfa*v_approx_nor
         v_result = alfa*v_approx
