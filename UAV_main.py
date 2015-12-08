@@ -15,6 +15,7 @@ import time
 import pathfollowing
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from pylab import *
 #from PathGenerationCubic import path_3d
 #from FieldGeneration import calc_vec_field_fast
 #from mayavi import mlab
@@ -111,15 +112,14 @@ yspace=np.linspace(0, np.size(yerror)-1, num=np.size(yerror))
 zspace=np.linspace(0, np.size(zerror)-1, num=np.size(zerror))
 
 
+
+figure(0)
 plt.plot(xspace,xerror,'r',yspace,yerror,'g',zspace,zerror,'b')
+figure(1)
 plt.plot(xspace,np.sqrt(xerror*xerror+yerror*yerror))
-#
-#plt.plot(yspace,yerror)
-#plt.plot(xspace,xerror)
-#
-#plt.plot(path[0],path[1], 'r--', xp, yp, 'g')
-#plt.plot(xpnear,ypnear, 'r--', xp, yp, 'g')
-#ax = plt.axes(projection='3d')
-#ax.plot(path[0],path[1], path[2], '-b')
+figure(2)
+ax = plt.axes(projection='3d')
+ax.plot(path[0],path[1],path[2],'b')
+ax.plot(xyzarray[0],xyzarray[1],xyzarray[2],'r')
 
 
