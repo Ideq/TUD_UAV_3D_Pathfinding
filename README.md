@@ -14,16 +14,26 @@ Tested in Windows 8.1 and Mac OS with Python 2.7 in Spyder
 3. Start the simulation of an area
 
 4. Run the UAV_main.py to start the mapdatageneration, pathgeneration and pathfollowing algorythm
+
 	Step 1:
+	
 	Generates an array with the mapdata for the current scene in VREP
+	
 	Step 2:
+	
 	Reads the starting position and the goal from the scene
+	
 	Step 3:
+	
 	Finds and interpolates a Path
+	
 	Step 4:
+	
 	Starts the pathfollowing
+	
 	Step 5:
-	After the goal is reached, it shows the calculated path in comparison to the real path the UAV was flying
+	
+	After the goal is reached, it shows the calculated path in comparison to the real path the UAV was flying in 2D.
 ## Documentation
 
 * The function **path_3d(pos, loop)** included in the file "PathGenerationCubic.py" takes as an argument an array of 3D points (pos) where the path should go through and a boolean (loop) which defines if the trayectory is closed or open. The return of the function is an array for each coordinate of the path and the time (path_x, path_y, path_z and path_t).
