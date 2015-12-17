@@ -1,21 +1,39 @@
-# Generator of 3-Dimensional vector field for path following
-This repository contains python helper files which allows the calculation and display of 3D paths and vector fields for using in robot path following.
+#3D pathgeneration and pathfollowing for UAV in VREP 
+This repository contains python code, that can be ran in combination with the Roboter Simulation Platform VREP. We used this Platform to simulate Pathfinding, Pathsmoothing und Pathfollowing for an UAV in some different areas(one small test area and a bigger area showing 2 buildings of our univesity)
 
 ## Requirenments:
 
-Tested in Ubuntu 12.04 and 14.04 with Python 2.7
+Tested in Windows 8.1 and Mac OS with Python 2.7 in Spyder
 
 ## Installation
 
-1. Install Mayavi (Scientific visualization package for 2D and 3D data
+1. Install VREP
 
-        sudo apt-get install mayavi2
-2. Clone the repo.
+2. Clone the repo
 
-        git clone git@github.com:raultron/3d_path_vector_field.git
-3. Execute the file "Example.py" in python. If everything is working you should see a Mayavi windows with a visualization of the Path, the 3D vector field and the streamlines.
+3. Start the simulation of an area
 
+4. Run the UAV_main.py to start the mapdatageneration, pathgeneration and pathfollowing algorythm
 
+	###Step 1:
+	
+	Generates an array with the mapdata for the current scene in VREP
+	
+	Step 2:
+	
+	Reads the starting position and the goal from the scene
+	
+	Step 3:
+	
+	Finds and interpolates a Path
+	
+	Step 4:
+	
+	Starts the pathfollowing
+	
+	Step 5:
+	
+	After the goal is reached, it shows the calculated path in comparison to the real path the UAV was flying in 2D.
 ## Documentation
 
 * The function **path_3d(pos, loop)** included in the file "PathGenerationCubic.py" takes as an argument an array of 3D points (pos) where the path should go through and a boolean (loop) which defines if the trayectory is closed or open. The return of the function is an array for each coordinate of the path and the time (path_x, path_y, path_z and path_t).
