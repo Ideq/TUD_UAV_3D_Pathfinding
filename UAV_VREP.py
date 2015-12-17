@@ -130,8 +130,8 @@ def followPath2(clientID,path,goal):
     xPosition=pos[0]
     yPosition=pos[1]
     zPosition=pos[2]
-    xvelomax=0.7
-    yvelomax=0.7
+    xvelomax=0.3
+    yvelomax=0.3
     zmax=1
     xp=[]
     yp=[]
@@ -148,23 +148,31 @@ def followPath2(clientID,path,goal):
     pveloz=0
     pangle=0
     pref_angz=0
-    while (xPosition > pathx[199]+0.1) or (xPosition < pathx[199]-0.1) or (yPosition > pathy[199]+0.1) or (yPosition < pathy[199]-0.1) or (zPosition > pathz[199]+0.1) or (zPosition < pathz[199]-0.1):
-        xvelomax=0.6
-        yvelomax=0.6
+    distest=1
+    #while (xPosition > pathx[(len(pathx)-1)]+0.1) or (xPosition < pathx[(len(pathx)-1)]-0.1) or (yPosition > pathy[(len(pathx)-1)]+0.1) or (yPosition < pathy[(len(pathx)-1)]-0.1):
+    while (distest > 0.05):
+        xvelomax=0.4
+        yvelomax=0.4
         zmax=1
-        absolut_dis=math.sqrt((xPosition-pathx[199])**2+(yPosition-pathy[199])**2+(zPosition-pathz[199])**2)
+        turnmax=5
+        absolut_dis=math.sqrt((xPosition-pathx[(len(pathx)-1)])**2+(yPosition-pathy[(len(pathx)-1)])**2+(zPosition-pathz[(len(pathx)-1)])**2)
+        absolut_dis2=math.sqrt((xPosition-pathx[0])**2+(yPosition-pathy[0])**2+(zPosition-pathz[0])**2)
         #print absolut_dis
         slowvelo_dis=4
         if absolut_dis < slowvelo_dis:
-            xvelomax=xvelomax*absolut_dis/slowvelo_dis
-            yvelomax=yvelomax*absolut_dis/slowvelo_dis
+            xvelomax=(xvelomax-0.1)*absolut_dis/slowvelo_dis*absolut_dis/slowvelo_dis+0.1
+            yvelomax=(yvelomax-0.1)*absolut_dis/slowvelo_dis*absolut_dis/slowvelo_dis+0.1
+            #turnmax=turnmax*absolut_dis/slowvelo_dis
+        if absolut_dis2 < slowvelo_dis/4:
+            velomax=(xvelomax-0.1)*absolut_dis2/slowvelo_dis/4+0.1
+            yvelomax=(yvelomax-0.1)*absolut_dis2/slowvelo_dis/4+0.1
+            #turnmax=2
             #zmax=zmax*absolut_dis/slowvelo_dis
             
-            print xvelomax
-            print yvelomax
-            print zmax   
+            #print xvelomax
+            #print yvelomax
+            #print zmax   
             
-        start_time = time.time()
         #pos=getPosition(clientID,'UAV')
         errorCode,pos=vrep.simxGetObjectPosition(clientID,UAV,-1,vrep.simx_opmode_buffer)
         errorCode,orientation=vrep.simxGetObjectOrientation(clientID,UAV,-1,vrep.simx_opmode_buffer)
@@ -178,7 +186,8 @@ def followPath2(clientID,path,goal):
         zp.append(zPosition)
                
         vec,pnear=pathfollowing.findnearst(pos,path)
-        
+        #vec=vec1[0]        
+        #print vec
         xpnear.append(pnear[0])
         ypnear.append(pnear[1])
         zpnear.append(pnear[2])
@@ -187,22 +196,25 @@ def followPath2(clientID,path,goal):
         yerror.append(abs(yPosition-pnear[1]))
         zerror.append(abs(zPosition-pnear[2]))
         
-        
-        
+        (xgoal,ygoal,zgoal)=goal
+        distest=np.sqrt((xPosition-pathx[(len(pathx)-1)])**2+(yPosition-pathy[(len(pathx)-1)])**2)
+        #xdiff=xPosition-pnear[0]
+        #ydiff=yPosition-pnear[1]
+        #print distest
         #print vec
         #print vecp
         #vecp=vec 
         
-        absolut=math.sqrt(vec[0]**2+vec[1]**2+vec[2]**2)
+        absolut=math.sqrt(vec[0,0]**2+vec[0,1]**2+vec[0,2]**2)
         xvelo=0
         yvelo=0
         height=zPosition
     
-        xvelo_w=xvelomax*vec[0]/absolut#ref_velx
-       
-        yvelo_w=yvelomax*vec[1]/absolut#ref_vely
+        xvelo_w=xvelomax*vec[0,0]/absolut#ref_velx
+
+        yvelo_w=yvelomax*vec[0,1]/absolut#ref_vely
         
-        height=zPosition+vec[2]*zmax            #e
+        height=zPosition+vec[0,2]*zmax            #e
         
         #print height
         #ref_angz, angle between (1/0/0) and (xvelo/yvelo/0)
@@ -210,44 +222,47 @@ def followPath2(clientID,path,goal):
         #b1=[xvelo,yvelo,0]
         b1=[xvelo_w,yvelo_w,0]
         ref_angz=angle_calculationx(a1,b1)    
-        if orientation[2]<0:
-            angle=2*np.pi+orientation[2]
-        else:
-            angle=orientation[2]
-        if ref_angz<0:
-            ref_angz=2*np.pi+ref_angz
-        dangle=angle-ref_angz
-        
+        #if orientation[2]<0:
+            #angle=2*np.pi+orientation[2]
+        #else:
+        angle=orientation[2]
+        #if ref_angz<0:
+            #ref_angz=2*np.pi+ref_angz
+        dangle=ref_angz-angle
+        #print dangle
         #if dangle>np.pi:
             #print dangle
         if dangle>np.pi:
-            veloz=6*(2*np.pi-dangle)/np.pi
-        else:
-            if dangle<-np.pi:
-                veloz=-6*(2*np.pi+dangle)/np.pi
-            else:
-                veloz=-6*(dangle)/np.pi
+            dangle=dangle-2*np.pi
+        if dangle<-np.pi:
+            dangle=2*np.pi+dangle
+        veloz=turnmax*(dangle)/np.pi
+        #print dangle
         #ref_angz=0
-        if dangle-pdangle>1:
-            print pdangle,dangle
-            print pangle,angle
-            print pref_angz,ref_angz
-            print pveloz,veloz
+        #if dangle-pdangle>1:
+            #print pdangle,dangle
+            #print pangle,angle
+            #print pref_angz,ref_angz
+            #print pveloz,veloz
         pdangle=dangle
         pveloz=veloz
         pangle=angle
         pref_angz=ref_angz
-        xvelo=xvelo_w*np.cos(-orientation[2])-yvelo_w*np.sin(-orientation[2])
-        yvelo=xvelo_w*np.sin(-orientation[2])+yvelo_w*np.cos(-orientation[2])
+        #if (xvelo_w<0.01) and (yvelo_w<0.01):
+            #veloz=0
+        xvelo=xvelo_w*np.cos(ref_angz)+yvelo_w*np.sin(ref_angz)
+        yvelo=yvelo_w*np.cos(ref_angz)-xvelo_w*np.sin(ref_angz)
+        #xvelo=xvelo_w*np.cos(angle)+yvelo_w*np.sin(angle)
+        #yvelo=yvelo_w*np.cos(angle)-xvelo_w*np.sin(angle)
         data=[xvelo,yvelo,height,0,0,veloz]
         #data=[-0.1,0,height,0,0,veloz]
         #print data
+        #print xvelo,yvelo
         packedData=vrep.simxPackFloats(data)
         vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
         vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
-        #time.sleep(0.5)
-        #print("--- %s seconds ---" % (time.time() - start_time))
-    data=[0,0,height,0,0,0]
+        #time.sleep(0.1) 
+    data=[0,0,zgoal,0,0,0]
     packedData=vrep.simxPackFloats(data)
     vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
     vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)

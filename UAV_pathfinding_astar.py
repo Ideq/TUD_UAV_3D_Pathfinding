@@ -34,7 +34,7 @@ def search(goal,start,search_type,interpolation,mapdata):
         path = rrt_search(grid, start2, goal2, mapdata) 
         #print goal2, start2
         #print path
-    #print path
+    print path
     path=interpolation_skip_points(path)
     #print path
     path=path_grid_to_m(path,start,goal)
@@ -46,7 +46,15 @@ def search(goal,start,search_type,interpolation,mapdata):
     #print path
     return path
     #return
-    
+def testpath():
+    path=[(2,1,1),(3,1,1),(4,1,1),(4,2,1),(4,3,1),(4,4,1),(5,4,1),(6,4,1),(7,4,1),(7,3,1),(8,3,1),(9,3,1),(10,3,1),(11,3,1),(12,3,1),(12,2,1),(12,1,1),(11,1,1),(10,1,1),(9,1,1)]
+    #path=[(2,1,1),(3,1,1),(4,1,1),(4,2,1),(4,3,1)]
+    #path=[(6,1,1),(5,1,1),(4,1,1),(4,2,1),(4,3,1),(4,4,1),(4,5,1),(4,6,1)]
+    path=path_grid_to_m(path,(1*0.4+0.4,1*0.4+0.2,1*0.4+0.3),(8*0.4+0.4,1*0.4+0.2,1*0.4+0.3))
+    #print path
+    path=interpolation_polynom(path,3)
+    return path
+   
 def m_to_grid(point):   
     xm=point[0]
     ym=point[1]
@@ -128,17 +136,20 @@ def interpolation_polynom(path,grad):
 #    #arrange the data to use the function
 #    data = data.transpose()
     #interpolate polynom degree 1
+    (x,y)=path.shape
+    print x,y
+    anzahl=y*40
     if grad==1:
-        tck, u= interpolate.splprep(path,k=1,s=10)
-        path = interpolate.splev(np.linspace(0,1,200), tck)
+        tck, u= interpolate.splprep(path,k=1,s=0.2)
+        path = interpolate.splev(np.linspace(0,1,anzahl), tck)
     #interpolate polynom degree 2
     if grad==2:
-        tck, u= interpolate.splprep(path,k=2,s=10)
-        path = interpolate.splev(np.linspace(0,1,200), tck)
+        tck, u= interpolate.splprep(path,k=2,s=0.2)
+        path = interpolate.splev(np.linspace(0,1,anzahl), tck)
     #interpolate polynom degree 3
     if grad==3:
-        tck, u= interpolate.splprep(path, w=None, u=None, ub=None, ue=None, k=3, task=0, s=0.3, t=None, full_output=0, nest=None, per=0, quiet=1)
-        path = interpolate.splev(np.linspace(0,1,200), tck)
+        tck, u= interpolate.splprep(path, w=None, u=None, ub=None, ue=None, k=3, task=0, s=0.2, t=None, full_output=0, nest=None, per=0, quiet=1)
+        path = interpolate.splev(np.linspace(0,1,anzahl), tck)
     return path
 
 #this queue structure is needed for the A* algorythm and the difference to the Dijkstra algorythm, which would return the same result, but normally needs more time

@@ -28,8 +28,8 @@ packedData=vrep.simxPackFloats(data)
 vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
 vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
 #generate mapdata, load data if mapdata for scene exist not implemented till now   
-#mapdata=UAV_mapgen.mapgen_fast("hexagon",32,32,10,clientID)
-mapdata=UAV_mapgen.mapgen("testroom111",12,12,4,clientID)
+mapdata=UAV_mapgen.mapgen_fast("hexagon",32,32,10,clientID)
+#mapdata=UAV_mapgen.mapgen("testroom111",12,12,4,clientID)
    
 
 #Get goal-data from V-REP
@@ -48,9 +48,8 @@ print start_position
 #Start pathfinding
 print "start pathfinding"
 start_time = time.time()
-path=UAV_pathfinding_astar.search(goal_position,start_position,"rrt",3,mapdata)
-#path=UAV_pathfinding_astar.search(goal_position,start_position,"rrt",3,mapdata)
-print("--- %s seconds ---" % (time.time() - start_time))
+path=UAV_pathfinding_astar.search(goal_position,start_position,"astar",3,mapdata)
+#path=UAV_pathfinding_astar.testpath()
 #print path
     #function
         #input
@@ -111,13 +110,13 @@ yspace=np.linspace(0, np.size(yerror)-1, num=np.size(yerror))
 zspace=np.linspace(0, np.size(zerror)-1, num=np.size(zerror))
 
 
-plt.plot(xspace,xerror,'r',yspace,yerror,'g',zspace,zerror,'b')
-plt.plot(xspace,np.sqrt(xerror*xerror+yerror*yerror))
-#
+#plt.plot(xspace,xerror,'r',yspace,yerror,'g',zspace,zerror,'b')
+#plt.plot(xspace,np.sqrt(xerror*xerror+yerror*yerror))
+
 #plt.plot(yspace,yerror)
 #plt.plot(xspace,xerror)
-#
-#plt.plot(path[0],path[1], 'r--', xp, yp, 'g')
+
+plt.plot(xyzarray[0],xyzarray[1], 'ro', path[0], path[1], 'g-')
 #plt.plot(xpnear,ypnear, 'r--', xp, yp, 'g')
 #ax = plt.axes(projection='3d')
 #ax.plot(path[0],path[1], path[2], '-b')
