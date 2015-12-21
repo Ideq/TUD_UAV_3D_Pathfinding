@@ -36,6 +36,9 @@ Tested in Windows 8.1 and Mac OS with Python 2.7 in Spyder
 	After the goal is reached, it shows the calculated path in comparison to the real path the UAV was flying in 2D.
 ## Documentation
 
+	###filename.py
+	
+
 * The function **path_3d(pos, loop)** included in the file "PathGenerationCubic.py" takes as an argument an array of 3D points (pos) where the path should go through and a boolean (loop) which defines if the trayectory is closed or open. The return of the function is an array for each coordinate of the path and the time (path_x, path_y, path_z and path_t).
 
 * The function **calc_vec_field_fast(path_x, path_y, path_z, cube_size, cube_step)** included in the file "FieldGeneration.py" defines a 3D matrix CUBE for the field of size cube_size and with step size cube_step. For each point inside this cube it calculate the best aproximation vector to the path using the methodology explained in the paper: TODO. The return of the function is the calculated vector field and some helper grids for displaying this field in mayavi.

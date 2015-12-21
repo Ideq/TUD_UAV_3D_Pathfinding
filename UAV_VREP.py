@@ -151,8 +151,8 @@ def followPath2(clientID,path,goal):
     distest=1
     #while (xPosition > pathx[(len(pathx)-1)]+0.1) or (xPosition < pathx[(len(pathx)-1)]-0.1) or (yPosition > pathy[(len(pathx)-1)]+0.1) or (yPosition < pathy[(len(pathx)-1)]-0.1):
     while (distest > 0.05):
-        xvelomax=0.4
-        yvelomax=0.4
+        xvelomax=0.23
+        yvelomax=0.23
         zmax=1
         turnmax=5
         absolut_dis=math.sqrt((xPosition-pathx[(len(pathx)-1)])**2+(yPosition-pathy[(len(pathx)-1)])**2+(zPosition-pathz[(len(pathx)-1)])**2)
@@ -164,7 +164,7 @@ def followPath2(clientID,path,goal):
             yvelomax=(yvelomax-0.1)*absolut_dis/slowvelo_dis*absolut_dis/slowvelo_dis+0.1
             #turnmax=turnmax*absolut_dis/slowvelo_dis
         if absolut_dis2 < slowvelo_dis/4:
-            velomax=(xvelomax-0.1)*absolut_dis2/slowvelo_dis/4+0.1
+            xvelomax=(xvelomax-0.1)*absolut_dis2/slowvelo_dis/4+0.1
             yvelomax=(yvelomax-0.1)*absolut_dis2/slowvelo_dis/4+0.1
             #turnmax=2
             #zmax=zmax*absolut_dis/slowvelo_dis
@@ -205,7 +205,7 @@ def followPath2(clientID,path,goal):
         #print vecp
         #vecp=vec 
         
-        absolut=math.sqrt(vec[0,0]**2+vec[0,1]**2+vec[0,2]**2)
+        absolut=math.sqrt(vec[0,0]**2+vec[0,1]**2)
         xvelo=0
         yvelo=0
         height=zPosition
@@ -250,6 +250,8 @@ def followPath2(clientID,path,goal):
         pref_angz=ref_angz
         #if (xvelo_w<0.01) and (yvelo_w<0.01):
             #veloz=0
+        xvelo_w=xvelo_w*((np.pi-abs(dangle))/np.pi)**120
+        yvelo_w=yvelo_w*((np.pi-abs(dangle))/np.pi)**120
         xvelo=xvelo_w*np.cos(ref_angz)+yvelo_w*np.sin(ref_angz)
         yvelo=yvelo_w*np.cos(ref_angz)-xvelo_w*np.sin(ref_angz)
         #xvelo=xvelo_w*np.cos(angle)+yvelo_w*np.sin(angle)
@@ -257,11 +259,11 @@ def followPath2(clientID,path,goal):
         data=[xvelo,yvelo,height,0,0,veloz]
         #data=[-0.1,0,height,0,0,veloz]
         #print data
-        #print xvelo,yvelo
+        print xvelo_w,yvelo_w
         packedData=vrep.simxPackFloats(data)
         vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
         vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
-        #time.sleep(0.1) 
+        #time.sleep(1) 
     data=[0,0,zgoal,0,0,0]
     packedData=vrep.simxPackFloats(data)
     vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
