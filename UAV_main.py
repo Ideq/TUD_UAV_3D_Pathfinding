@@ -62,6 +62,8 @@ path=UAV_pathfinding_astar.search(goal_position,start_position,"astar",3,mapdata
         #input 
             #path, color(1=green,2=yewllow,3=red)
 #UAV_VREP.showPath(clientID,path,1)
+path_ready=1
+
 UAV_VREP.show_path2(path,clientID)
 #Path following
     #function
