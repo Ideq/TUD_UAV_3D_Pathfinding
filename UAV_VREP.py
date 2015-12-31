@@ -151,8 +151,10 @@ def followPath2(clientID,path,goal):
     distest=1
     #while (xPosition > pathx[(len(pathx)-1)]+0.1) or (xPosition < pathx[(len(pathx)-1)]-0.1) or (yPosition > pathy[(len(pathx)-1)]+0.1) or (yPosition < pathy[(len(pathx)-1)]-0.1):
     while (distest > 0.05):
-        xvelomax=0.23
-        yvelomax=0.23
+        #xvelomax=0.23
+        #yvelomax=0.23
+        xvelomax=0.5
+        yvelomax=0.5
         zmax=1
         turnmax=5
         absolut_dis=math.sqrt((xPosition-pathx[(len(pathx)-1)])**2+(yPosition-pathy[(len(pathx)-1)])**2+(zPosition-pathz[(len(pathx)-1)])**2)
@@ -250,8 +252,8 @@ def followPath2(clientID,path,goal):
         pref_angz=ref_angz
         #if (xvelo_w<0.01) and (yvelo_w<0.01):
             #veloz=0
-        xvelo_w=xvelo_w*((np.pi-abs(dangle))/np.pi)**120
-        yvelo_w=yvelo_w*((np.pi-abs(dangle))/np.pi)**120
+        xvelo_w=xvelo_w*((np.pi-abs(dangle))/np.pi)**20
+        yvelo_w=yvelo_w*((np.pi-abs(dangle))/np.pi)**20
         xvelo=xvelo_w*np.cos(ref_angz)+yvelo_w*np.sin(ref_angz)
         yvelo=yvelo_w*np.cos(ref_angz)-xvelo_w*np.sin(ref_angz)
         #xvelo=xvelo_w*np.cos(angle)+yvelo_w*np.sin(angle)
@@ -269,6 +271,11 @@ def followPath2(clientID,path,goal):
     vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
     vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
     
+    
+    data2=[0]
+    packedData2=vrep.simxPackFloats(data2)
+    vrep.simxClearStringSignal(clientID,'Command_Path_Ready',vrep.simx_opmode_oneshot)
+    vrep.simxSetStringSignal(clientID,'Command_Path_Ready',packedData2,vrep.simx_opmode_oneshot)    
     
     xyzparray=np.ndarray(shape=(3,len(xp)),dtype=float)
     for next in range(len(xp)):

@@ -27,6 +27,10 @@ data=[0,0,10,0,0,0]
 packedData=vrep.simxPackFloats(data)
 vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
 vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
+data2=[0]
+packedData2=vrep.simxPackFloats(data2)
+vrep.simxClearStringSignal(clientID,'Command_Path_Ready',vrep.simx_opmode_oneshot)
+vrep.simxSetStringSignal(clientID,'Command_Path_Ready',packedData2,vrep.simx_opmode_oneshot)
 #generate mapdata, load data if mapdata for scene exist not implemented till now   
 mapdata=UAV_mapgen.mapgen_fast("hexagon_new",44,44,20,clientID)
 #mapdata=UAV_mapgen.mapgen("testroom111",12,12,4,clientID)
@@ -62,8 +66,11 @@ path=UAV_pathfinding_astar.search(goal_position,start_position,"astar",3,mapdata
         #input 
             #path, color(1=green,2=yewllow,3=red)
 #UAV_VREP.showPath(clientID,path,1)
-path_ready=1
-
+#path_ready=1
+data2=[1]
+packedData2=vrep.simxPackFloats(data2)
+vrep.simxClearStringSignal(clientID,'Command_Path_Ready',vrep.simx_opmode_oneshot)
+vrep.simxSetStringSignal(clientID,'Command_Path_Ready',packedData2,vrep.simx_opmode_oneshot)
 UAV_VREP.show_path2(path,clientID)
 #Path following
     #function
