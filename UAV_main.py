@@ -23,6 +23,8 @@ from mpl_toolkits.mplot3d import Axes3D
 #start Connection to V-REP
 vrep.simxFinish(-1) # just in case, close all opened connections
 clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
+#enable=true;
+vrep.simxSynchronous(clientID,True);
 data=[0,0,10,0,0,0]
 packedData=vrep.simxPackFloats(data)
 vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
@@ -67,11 +69,12 @@ path=UAV_pathfinding_astar.search(goal_position,start_position,"astar",3,mapdata
             #path, color(1=green,2=yewllow,3=red)
 #UAV_VREP.showPath(clientID,path,1)
 #path_ready=1
+
+UAV_VREP.show_path2(path,clientID)
 data2=[1]
 packedData2=vrep.simxPackFloats(data2)
 vrep.simxClearStringSignal(clientID,'Command_Path_Ready',vrep.simx_opmode_oneshot)
 vrep.simxSetStringSignal(clientID,'Command_Path_Ready',packedData2,vrep.simx_opmode_oneshot)
-UAV_VREP.show_path2(path,clientID)
 #Path following
     #function
         #input
