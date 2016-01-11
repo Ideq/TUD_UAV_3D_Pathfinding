@@ -135,7 +135,7 @@ def mapgen_fast(scene_name,x,y,z,clientID):
                             y1=0.2+4*(index2)+y*0.4
                             z1=0.4*index3+0.21
                             vrep.simxSetObjectPosition (clientID,sensor_data[x,y],-1,(x1,y1,z1),vrep.simx_opmode_oneshot)    
-                    time.sleep(0.1)
+                    time.sleep(1)
         arr=save(arr)
         data_string=np.ndarray.dumps(arr)
         print data_string
