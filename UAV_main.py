@@ -8,7 +8,7 @@ Created on Sun Nov 01 15:34:40 2015
 #UAV_main.py
 import vrep
 import UAV_mapgen
-import UAV_pathfinding_astar
+import UAV_pathfinding
 import UAV_VREP
 import numpy as np
 import time
@@ -39,7 +39,7 @@ print start_position
 #Start pathfinding
 print "start pathfinding"
 start_time = time.time()
-path=UAV_pathfinding_astar.search(goal_position,start_position,"astar",3,mapdata)
+path=UAV_pathfinding.search(goal_position,start_position,"astar",3,mapdata)
 
 print("--- %s seconds ---" % (time.time() - start_time))
 #print path
