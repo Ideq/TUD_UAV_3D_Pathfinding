@@ -11,7 +11,6 @@ import UAV_mapgen
 import UAV_pathfinding
 import UAV_VREP
 import numpy as np
-import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -37,14 +36,9 @@ print start_position
              
 #Start pathfinding
 print "start pathfinding"
-start_time = time.time()
+
 path=UAV_pathfinding.search(goal_position,start_position,"astar",3,mapdata)
 print "pathfinding finished"
-    #function "UAV_pathfinding.search()"
-        #input
-            #goal_position, start_position, type of algorythm(A* or RRT), type of interpolation(1=linear, 2=quadratic, 3=qubic)
-        #output
-            #array, named path, contains all points of the smothed interpolated path
 
 #function to start the signals to transport the data to V-REP(LUA) and give the signal to the UAV-script, that the path is ready
 UAV_VREP.show_path(path,clientID)
@@ -53,17 +47,18 @@ UAV_VREP.show_path(path,clientID)
 xyzarray,xyzneararray=UAV_VREP.followPath(clientID,path,goal_position)
 
 # Plot
+#arrange the data for the plot
 xerror=abs(xyzarray[0]-xyzneararray[0])
 yerror=abs(xyzarray[1]-xyzneararray[1])
 zerror=abs(xyzarray[2]-xyzneararray[2])
-
-
 xspace=np.linspace(0, np.size(xerror)-1, num=np.size(xerror))
 yspace=np.linspace(0, np.size(yerror)-1, num=np.size(yerror))
 zspace=np.linspace(0, np.size(zerror)-1, num=np.size(zerror))
 
 #plot the path over the real movement in 2D(xy-plane)
 plt.plot(xyzarray[0],xyzarray[1], 'ro', path[0], path[1], 'g-')
+
+
 
 #somemore plot-suggestions that are possible showing different aspects of the path-following
 #plt.plot(xspace,xerror,'r',yspace,yerror,'g',zspace,zerror,'b')
