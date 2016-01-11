@@ -64,20 +64,39 @@ Tested in Windows 8.1 and Mac OS with Python 2.7 in Spyder
 		####functions
 			#####getPosition
 				######input
+				clientID, integer, needed to execute API-functions
+				object_name, string, the name of the object, which position you want to get
 				######output
+				position, array with the 3 coordinates x,y,z in meters
 				######code
+				First the object handle is returned from V-REP, afterwards its possible to get the position from V-REP.
 			#####angle_calculation
 				######input
+				a and b, arrays(1x3), 3D-vectors
 				######output
+				angle, float, the angle between the two vectors in radiant, always returns the small angle
 				######code
+				Simple angle calculation with the scalar-product and the arcus-cosinus using functions from math.py
 			#####show_path
 				######input
+				path, array, contains 1 array for each coordinate, the length of these arrays depends on the length of the path
+				clientID, integer, needed to execute API-functions
 				######output
+				no return value, but this function creates string signals with the coordinate arrays, which are read from the UAV-LUA-script
 				######code
+				After the path-array is divided, the 3 signals are created.
 			#####followPath
 				######input
+				clientID, integer, needed to execute API-functions
+				path, array, contains 1 array for each coordinate, the length of these arrays depends on the length of the path
+				goal, tupel, contains the 3 coordinates of the goal-position
 				######output
+				plot-data, array, contains the position of the UAV in each simulation step
 				######code
+				Depending on the current position of the UAV and the path a direction for the UAV is calculated and converted into velocities, 
+				which are given to the UAV, by creating string signals, that are checked by the UAV-LUA-script. After the calculation is finished 
+				the next simulation-step is tiggered. This algorythm is repeated, till the goal-position is reached.
+				Afterwards the signals are cleaned up and some plot-data is returned to the main-script.
 
 * The function **path_3d(pos, loop)** included in the file "PathGenerationCubic.py" takes as an argument an array of 3D points (pos) where the path should go through and a boolean (loop) which defines if the trayectory is closed or open. The return of the function is an array for each coordinate of the path and the time (path_x, path_y, path_z and path_t).
 
