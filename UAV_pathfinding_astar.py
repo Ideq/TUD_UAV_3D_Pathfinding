@@ -71,7 +71,7 @@ def interpolation_skip_points(path):
                     in_progress=1   
                 i=i+1
     print path
-    path2=deepcopy(path)
+    path2=deepcopy(path)  
     n=0
     count_points=0
     while n < (len(path2)-1):
@@ -166,6 +166,7 @@ def heuristic(a, b):
 def a_star_search(graph, start, goal,mapdata):
     frontier = PriorityQueue()
     frontier.put(start, 0)
+    print start
     came_from = {}
     cost_so_far = {}
     came_from[start] = None
@@ -232,7 +233,6 @@ class SquareGrid:
         return results
 
 def collision(a,b):
-    #print a,b
     (x1,y1,z1)=a
     (x2,y2,z2)=b
     out=0;
@@ -246,20 +246,8 @@ def collision(a,b):
         y=round(y,0)
         z=round(z,0)
         out=out+mapdata2[x,y,z]
-    #print out
     #returns only true, if all nodes checked in the array returned the value 0 which means no obstacle
     return out==0
-
-
-#vrep.simxFinish(-1) # just in case, close all opened connections
-
-#clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
-
-
-#create a grid
-#grid=SquareGrid(30,30,10)
-#start the Pathfinding algorythm
-#came_from, cost_so_far = a_star_search(grid, (0, 0, 0), (16, 16, 0))
 
 #this function is need to get the path(in points, nodes) from the results of the pathfinding algorythm
 def reconstruct_path(came_from, start, goal):
@@ -272,11 +260,6 @@ def reconstruct_path(came_from, start, goal):
     path.reverse()
     return path
 
-#use the reconstruct function to get the path
-#path2=reconstruct_path(came_from,(0,0,0),(16,16,0))
-
-#need to control the quadrocopter later, by just moving away the target slowly
-#errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
 
 ##RRT
 def distance(a, b):
