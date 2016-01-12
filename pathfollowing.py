@@ -5,7 +5,6 @@ Created on Mon Nov 16 21:00:37 2015
 @author: renchen
 """
 import numpy as np
-import time
 def  findnearst(position, path):
     
     x=path[0]
