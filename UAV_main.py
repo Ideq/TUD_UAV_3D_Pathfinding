@@ -12,7 +12,10 @@ import UAV_pathfinding
 import UAV_VREP
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+from pylab import *
+
+
+
 
 #start Connection to V-REP
 vrep.simxFinish(-1) # just in case, close all opened connections
@@ -72,4 +75,20 @@ plt.plot(xyzarray[0],xyzarray[1], 'ro', path[0], path[1], 'g-')
 #ax = plt.axes(projection='3d')
 #ax.plot(path[0],path[1], path[2], '-b')
 
+figure(0)
+plt.plot(xspace,xerror,'r',yspace,yerror,'g',zspace,zerror,'b')
+figure(1)
+plt.plot(xspace,np.sqrt(xerror*xerror+yerror*yerror))
+figure(2)
+ax = plt.axes(projection='3d')
+ax.plot(path[0],path[1],path[2],'b')
+ax.plot(xyzarray[0],xyzarray[1],xyzarray[2],'r')
+#
+#plt.plot(yspace,yerror)
+#plt.plot(xspace,xerror)
+#
+#plt.plot(path[0],path[1], 'r--', xp, yp, 'g')
+#plt.plot(xpnear,ypnear, 'r--', xp, yp, 'g')
+#ax = plt.axes(projection='3d')
+#ax.plot(path[0],path[1], path[2], '-b')
 
