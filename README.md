@@ -97,6 +97,42 @@ Tested in Windows 8.1 and Mac OS with Python 2.7 in Spyder
 				which are given to the UAV, by creating string signals, that are checked by the UAV-LUA-script. After the calculation is finished 
 				the next simulation-step is tiggered. This algorythm is repeated, till the goal-position is reached.
 				Afterwards the signals are cleaned up and some plot-data is returned to the main-script.
+				
+
+
+
+
+
+                 ###pathfollowing.py
+              	        ####imports
+	     	                 numpy.py, for the arrays and some other mathematical operations 
+	     	        ####functions
+	     	                 ######input 
+	     	                 position, an array with the 3 coordinates x,y,z in meters which we get after pathfinding
+	     	                 path, an array, contains 1 array for each coordinate, the length of these arrays depends on the length of the path
+	                         ######output
+	                         v_result, a vector which dicides how does the UAV go into the path. 
+	                         v_tangent_nor, the tangent vector after the normalization
+	                         p_near, the nearest point in the path to the current position
+	                         distance, the distance between the nearest point and the current position
+	                ######code
+	                if the distance is not too big, the v_result is combined by two vectors: v_approx_nor and v_tangent_nor.
+The v_approx_nor is the vector which we get from the difference between the current position and the nearest point. We also did the normalization.
+                       if the distance is very big, bigger than 0.2 in our case, the v_result comes just from the v_approx. It makes the pathfollowing faster.
+
+
+                ###Scene: hexagon_neu.ttt
+                         Abstract: In the scene we have the S311 building which contains the walls and the windows. The goal_new object is the goal which we want the UAV to fly to. You can also move the goal. The UAV script is the main part of the scene. It can control the UAV and also draw the path which we calculated. We learned from our betreuer Raul's script, which will also be discribed on the following. 
+                         ##### UAV code
+                         unfinished
+                         
+                         
+                ### Rauls UAV code
+                         unfinished
+
+
+
+
 
 * The function **path_3d(pos, loop)** included in the file "PathGenerationCubic.py" takes as an argument an array of 3D points (pos) where the path should go through and a boolean (loop) which defines if the trayectory is closed or open. The return of the function is an array for each coordinate of the path and the time (path_x, path_y, path_z and path_t).
 
@@ -104,23 +140,10 @@ Tested in Windows 8.1 and Mac OS with Python 2.7 in Spyder
 
 
 
-               
-              ###pathfollowing.py
-              	   ####imports
-	     	       numpy.py, for the arrays and some other mathematical operations 
-	     	   ####functions
-	     	       ######input 
-	     	       position, an array with the 3 coordinates x,y,z in meters which we get after pathfinding
-	     	       path, an array, contains 1 array for each coordinate, the length of these arrays depends on the length of the path
-	               ######output
-	               v_result, a vector which dicides how does the UAV go into the path. 
-	               v_tangent_nor, the tangent vector after the normalization
-	               p_near, the nearest point in the path to the current position
-	               distance, the distance between the nearest point and the current position
-	          ######code
-	               if the distance is not too big, the v_result is combined by two vectors: v_approx_nor and v_tangent_nor.
-The v_approx_nor is the vector which we get from the difference between the current position and the nearest point. We also did the normalization.
-                       if the distance is very big, bigger than 0.2 in our case, the v_result comes just from the v_approx. It makes the pathfollowing faster.
+             
+                   
+                   
+                   
 
 ## Example
 
