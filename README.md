@@ -103,7 +103,7 @@ Tested in Windows 8.1 and Mac OS with Python 2.7 in Spyder
 
 
 
-                 ###pathfollowing.py
+        ###pathfollowing.py
               	        ####imports
 	     	                 numpy.py, for the arrays and some other mathematical operations 
 	     	        ####functions
@@ -121,13 +121,13 @@ The v_approx_nor is the vector which we get from the difference between the curr
                        if the distance is very big, bigger than 0.2 in our case, the v_result comes just from the v_approx. It makes the pathfollowing faster.
 
 
-                ###Scene: hexagon_neu.ttt
+        ###Scene: hexagon_neu.ttt
                          Abstract: In the scene we have the S311 building which contains the walls and the windows. The goal_new object is the goal which we want the UAV to fly to. You can also move the goal. The UAV script is the main part of the scene. It can control the UAV and also draw the path which we calculated. We learned from our betreuer Raul's script, which will also be discribed on the following. 
                          ##### UAV code
                          unfinished
                          
                          
-                ### Rauls UAV code
+        ### Rauls UAV code
                          unfinished
 
 
