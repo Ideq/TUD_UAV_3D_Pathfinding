@@ -102,6 +102,26 @@ Tested in Windows 8.1 and Mac OS with Python 2.7 in Spyder
 
 * The function **calc_vec_field_fast(path_x, path_y, path_z, cube_size, cube_step)** included in the file "FieldGeneration.py" defines a 3D matrix CUBE for the field of size cube_size and with step size cube_step. For each point inside this cube it calculate the best aproximation vector to the path using the methodology explained in the paper: TODO. The return of the function is the calculated vector field and some helper grids for displaying this field in mayavi.
 
+
+
+               
+              ###pathfollowing.py
+              	   ####imports
+	     	       numpy.py, for the arrays and some other mathematical operations 
+	     	   ####functions
+	     	       ######input 
+	     	       position, an array with the 3 coordinates x,y,z in meters which we get after pathfinding
+	     	       path, an array, contains 1 array for each coordinate, the length of these arrays depends on the length of the path
+	               ######output
+	               v_result, a vector which dicides how does the UAV go into the path. 
+	               v_tangent_nor, the tangent vector after the normalization
+	               p_near, the nearest point in the path to the current position
+	               distance, the distance between the nearest point and the current position
+	          ######code
+	               if the distance is not too big, the v_result is combined by two vectors: v_approx_nor and v_tangent_nor.
+The v_approx_nor is the vector which we get from the difference between the current position and the nearest point. We also did the normalization.
+                       if the distance is very big, bigger than 0.2 in our case, the v_result comes just from the v_approx. It makes the pathfollowing faster.
+
 ## Example
 
 In the file "example.py" we define 3 points in a closed loop configuration:
