@@ -124,12 +124,18 @@ The v_approx_nor is the vector which we get from the difference between the curr
         ###Scene: hexagon_neu.ttt
                          Abstract: In the scene we have the S311 building which contains the walls and the windows. The goal_new object is the goal which we want the UAV to fly to. You can also move the goal. The UAV script is the main part of the scene. It can control the UAV and also draw the path which we calculated. We learned from our betreuer Raul's script, which will also be discribed on the following. 
                          ##### UAV code
-                         unfinished
+                         1. modify the original quadrotor control to receive Twist commands from ROS.
+                         2.get the path from python and show the path in v-rep.
+                         3.We tried to control the quadricopter vertical and horizontal, bzw x,y and z direction. Then we got the error in Alpha, Beta and Rotation, which result in different velocities of the 4 rotors. Then we send the velocities to the rotors and let the quadcopter work properly.  We optimise the parameters to make the rotors work better.
                          
                          
         ### Rauls UAV code
-                         unfinished
-
+                         The original quadricopter script was given to us by Raul Acuna. The script has the following parts.
+                         1.ROS initialization
+                         2.modify the original quadrotor control to receive Twist commands from ROS.
+                         3.Prepare 2 floating views with the camera views.
+                         4.Control the quadricopter vertical and horizontal by deciding the motor velocities.
+                         5.Move the target object.
 
 
 
