@@ -64,11 +64,11 @@ def followPath(clientID,path,goal):
     errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV',vrep.simx_opmode_oneshot_wait)
     errorCode,pos=vrep.simxGetObjectPosition(clientID,UAV,-1,vrep.simx_opmode_streaming)
     errorCode,orientation=vrep.simxGetObjectOrientation(clientID,UAV,-1,vrep.simx_opmode_streaming)
-    errorCode,gesl,gesa=vrep.simxGetObjectVelocity(clientID,UAV,vrep.simx_opmode_streaming)
+    
     time.sleep(0.1) 
     errorCode,pos=vrep.simxGetObjectPosition(clientID,UAV,-1,vrep.simx_opmode_buffer)
     errorCode,orientation=vrep.simxGetObjectOrientation(clientID,UAV,-1,vrep.simx_opmode_buffer)
-    errorCode,gesl,gesa=vrep.simxGetObjectVelocity(clientID,UAV,vrep.simx_opmode_buffer)
+    
     
     #some initialization
     xPosition=pos[0]
@@ -83,10 +83,8 @@ def followPath(clientID,path,goal):
     xerror=[]
     yerror=[]
     zerror=[]
-    pdangle=0
-    pveloz=0
-    pangle=0
-    pref_angz=0
+    #define the radius around the goal, in which the UAV is slowed to lower the error between UAV and path
+    slowvelo_dis=4
     absolut_dis=1
     #path-following loop
     #here is the goal defined, in this case reach the goal <5cm, <2cm also works in nearly all case, but needs some more time at the end
@@ -96,22 +94,22 @@ def followPath(clientID,path,goal):
         yvelomax=1.5
         #define the max possible turnrate
         turnmax=8
-        #calculate the distance to the goal
-        absolut_dis=math.sqrt((xPosition-pathx[(len(pathx)-1)])**2+(yPosition-pathy[(len(pathx)-1)])**2+(zPosition-pathz[(len(pathx)-1)])**2)
-        #define the radius around the goal, in which the UAV is slowed to lower the error between UAV and path
-        slowvelo_dis=4
-        #lower the max velocities in the defined radius, closer to the goal the UAV is more slowed
-        if absolut_dis < slowvelo_dis:
-            xvelomax=(xvelomax-0.15)*absolut_dis/slowvelo_dis*absolut_dis/slowvelo_dis+0.15
-            yvelomax=(yvelomax-0.15)*absolut_dis/slowvelo_dis*absolut_dis/slowvelo_dis+0.15
+        
         #refresh the UAV information
         errorCode,pos=vrep.simxGetObjectPosition(clientID,UAV,-1,vrep.simx_opmode_buffer)
         errorCode,orientation=vrep.simxGetObjectOrientation(clientID,UAV,-1,vrep.simx_opmode_buffer)
-        errorCode,gesl,gesa=vrep.simxGetObjectVelocity(clientID,UAV,vrep.simx_opmode_buffer)
         #arrange the information
         xPosition=pos[0]
         yPosition=pos[1]
         zPosition=pos[2]       
+        
+        #calculate the distance to the goal
+        absolut_dis=math.sqrt((xPosition-pathx[(len(pathx)-1)])**2+(yPosition-pathy[(len(pathx)-1)])**2+(zPosition-pathz[(len(pathx)-1)])**2)
+        
+        #lower the max velocities in the defined radius, closer to the goal the UAV is more slowed
+        if absolut_dis < slowvelo_dis:
+            xvelomax=(xvelomax-0.15)*absolut_dis/slowvelo_dis*absolut_dis/slowvelo_dis+0.15
+            yvelomax=(yvelomax-0.15)*absolut_dis/slowvelo_dis*absolut_dis/slowvelo_dis+0.15        
         
         #save some information for the documentation after the following
         xp.append(xPosition)
