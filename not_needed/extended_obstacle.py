@@ -11,8 +11,8 @@ from itertools import product, combinations
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 
-#figure = plt.figure(figsize=(6,4), facecolor='w')
-#ax = figure.gca(projection='3d')
+figure = plt.figure(figsize=(6,4), facecolor='w')
+ax = figure.gca(projection='3d')
 
 
 #ax.plot(path[0],path[1], path[2], 'b')
@@ -28,15 +28,31 @@ from mpl_toolkits.mplot3d import Axes3D
 #ax.scatter([0.498],[0.31],[0.6],color="g",s=80)
 #ax.scatter([2.56],[2.35],[0.95],color="r",s=80)
 
-#r = [1.5,2.5]
-#r_z = [0,1]
+r = [1.5,2.5]
+r_z = [0,1.0]
+for s, e in combinations(np.array(list(product(r,r,r_z))), 2):
+    if np.sum(np.abs(s-e)) == r[1]-r[0]:
+        ax.plot3D(*zip(s,e), color="b")
+    if np.sum(np.abs(s-e)) == r_z[1]-r_z[0]:
+        ax.plot3D(*zip(s,e), color="b")
+
+r = [0.8,3.2]
+r_z = [0,1.6]
+for s, e in combinations(np.array(list(product(r,r,r_z))), 2):
+    if np.sum(np.abs(s-e)) == r[1]-r[0]:
+        ax.plot3D(*zip(s,e), color="g")
+    if np.sum(np.abs(s-e)) == r_z[1]-r_z[0]:
+        ax.plot3D(*zip(s,e), color="g")
+
+#r = [0.8,3.2]
+#r_z = [0,1.6]
 #for s, e in combinations(np.array(list(product(r,r,r_z))), 2):
 #    if np.sum(np.abs(s-e)) == r[1]-r[0]:
 #        ax.plot3D(*zip(s,e), color="r")
 #    if np.sum(np.abs(s-e)) == r_z[1]-r_z[0]:
 #        ax.plot3D(*zip(s,e), color="r")
 #        
-#r_sx =[1.2,2.8]
+# =[1.2,2.8]
 #r_sy =[1.2,2.8]
 #r_sz =[0,1.2]
 #
@@ -75,15 +91,15 @@ from mpl_toolkits.mplot3d import Axes3D
 #    print np.sum(np.abs(s-e))
 #    if np.sum(np.abs(s-e)) == r_sx[1]-r_sx[0]:
 #        print np.sum(np.abs(s-e))
-#        ax.plot3D(*zip(s,e), color="r")
+#        ax.plot3D(*zip(s,e), color="g")
 #    if np.sum(np.abs(s-e)) == r_sy[1]-r_sy[0]:
 #        print np.sum(np.abs(s-e))
-#        ax.plot3D(*zip(s,e), color="r")
+#        ax.plot3D(*zip(s,e), color="g")
 #for i in range(len(astar_x)):
     
 #ax.scatter(astar_x, astar_y, astar_z, zdir='z', s=30, c='g',marker='o')  
-#ax.plot(x, y, z, c='b')
-#ax.plot(real_path[0,0:], real_path[1,0:],real_path[2,0:], c='g')  
+#ax.plot(astar_x, astar_y, astar_z, c='b',marker='o')
+#ax.plot(astar_x_3, astar_y_3, astar_z_3, c='y',marker='o')  
 #ax.scatter(astar_x_2, astar_y_2, astar_z_2, zdir='z', s=30, c='y',marker='o',depthshade=False) 
 #ax.plot(astar_x_3, astar_y_3, astar_z_3, c='b', zorder = 0.5)
 
@@ -94,56 +110,40 @@ from mpl_toolkits.mplot3d import Axes3D
 #for i in range(1003):
 #    #time_data1p[i]=time_data1p[i]-time_data1[1]
 #    real_velo[1,i]=real_velo[1,i]-300
-real_x=real_path[0,0:]
-real_y=real_path[1,0:]
-real_z=real_path[2,0:]
-abs_error=[]
-for i in range(len(real_x)):
-    dx=real_x[i]-x
-    dy=real_y[i]-y
-    dz=real_z[i]-z
-         
-    distance=np.sqrt(dx*dx+dy*dy+dz*dz)  #caculate distance between position and every points in the path
-    
-    minindex=np.argmin(distance)
-    error_x=real_x[i]-x[minindex]
-    error_y=real_y[i]-y[minindex]
-    error_z=real_z[i]-z[minindex]
-    abs_error.append(error_x**2+error_y**2+error_z**2)
-plot_time=np.linspace(0, 27.43, num=1221)
-plt.plot(plot_time,abs_error,'r')  
+
+#plt.plot(real_velo[1,1:]/1000,real_velo[2,1:],'g')  
 #plt.plot(real_velo[1,1:]/1000,soll_velo[2,1:],'r') 
-plt.xlim(0,27.43)
+#plt.xlim(0,50)
 #plt.ylim(0.57,0.75)
-plt.xlabel('$t$ in s',fontsize = 20)
-plt.ylabel('$|\Delta x|$ in m',fontsize = 20)
-plt.xticks(fontsize = 15)
-plt.yticks(fontsize = 15)
+#plt.xlabel('$t$ in ms',fontsize = 20)
+#plt.ylabel('$x_3$ in m',fontsize = 20)
+#plt.xticks(fontsize = 15)
+#plt.yticks(fontsize = 15)
 #plt.legend(['real value','control input'],fontsize = 20)
-#ax.set_xlim(0,3.5)
-#ax.set_ylim(0,3.5)
-#ax.set_zlim(0,1.2)
-##
-#ax.set_xlabel('x in m',fontsize = 20)
-#ax.set_ylabel('y in m',fontsize = 20)
-#ax.set_zlabel('z in m',fontsize = 20)
-#ax.xaxis._axinfo['label']['space_factor'] = 2.5
-#ax.yaxis._axinfo['label']['space_factor'] = 2.5
-#ax.zaxis._axinfo['label']['space_factor'] = 2
-#ax.set_xticks([0,1,2,3])
-#ax.set_yticks([0,1,2,3])
-#ax.set_zticks([0,1])
+ax.set_xlim(0,4)
+ax.set_ylim(0,4)
+ax.set_zlim(0,2)
 #
-#ax.tick_params(labelsize=15)
-##plt.zlim(0,3)
-#blue=pl.lines.Line2D([0],[0],color="b",linewidth=2)
-#red=pl.lines.Line2D([0],[0],color="g",linewidth=2)
-#
-##red=pl.lines.Line2D([0],[0],color="r",linewidth=1)
-##plt.xlabel('$x_1$ in m',fontsize = 20)
-##plt.ylabel('$x_2$ in m',fontsize = 20)
-##plt.zlabel('$x_3$ in m',fontsize = 20)
-#ax.legend([blue,red], ['calculated path','UAV movement'],fontsize = 20,loc=(0.1,0.8))
+ax.set_xlabel('x in m',fontsize = 20)
+ax.set_ylabel('y in m',fontsize = 20)
+ax.set_zlabel('z in m',fontsize = 20)
+ax.xaxis._axinfo['label']['space_factor'] = 2.5
+ax.yaxis._axinfo['label']['space_factor'] = 2.5
+ax.zaxis._axinfo['label']['space_factor'] = 2
+ax.set_xticks([0,1,2,3,4])
+ax.set_yticks([0,1,2,3,4])
+ax.set_zticks([0,1,2])
+
+ax.tick_params(labelsize=15)
+#plt.zlim(0,3)
+blue=pl.lines.Line2D([0],[0],color="b",linewidth=2)
+red=pl.lines.Line2D([0],[0],color="g",linewidth=1)
+
+#red=pl.lines.Line2D([0],[0],color="r",linewidth=1)
+#plt.xlabel('$x_1$ in m',fontsize = 20)
+#plt.ylabel('$x_2$ in m',fontsize = 20)
+#plt.zlabel('$x_3$ in m',fontsize = 20)
+ax.legend([blue,red], ['real obstacle','extended obstacle'],fontsize = 20,loc=(0.1,0.8))
 
 #bigger font like double size
 #plt.xticks(fontsize = 15)

@@ -35,7 +35,8 @@ def  findnearst(position, path):
         v_tangent_nor=v_tangent/(np.sqrt(v_tangent[0]*v_tangent[0]+v_tangent[1]*v_tangent[1]))
         v_tangent_nor[2]=v_tangent_nor[2]*(np.sqrt(v_tangent[0]*v_tangent[0]+v_tangent[1]*v_tangent[1]))
         if distance<0.2:
-            alfa=np.matrix([[20*(distance/0.2)**3, 0, 0],[0, 20*(distance/0.2)**3, 0],[0, 0, 1]])
+            #alfa=np.matrix([[20*(distance/0.2)**3, 0, 0],[0, 20*(distance/0.2)**3, 0],[0, 0, 1]])
+            alfa=np.matrix([[0.7, 0, 0],[0, 0.7, 0],[0, 0, 1]])
         else:
             alfa=np.matrix([[20, 0, 0],[0, 20, 0],[0, 0, 1]])
         beta=np.matrix([[0.2, 0, 0],[0, 0.2, 0],[0, 0, 1]])     # 0<beta<1  self defination
@@ -49,7 +50,8 @@ def  findnearst(position, path):
             v_tangent_nor=v_tangent/(np.sqrt(v_tangent[0]*v_tangent[0]+v_tangent[1]*v_tangent[1]))
             v_tangent_nor[2]=v_tangent_nor[2]*(np.sqrt(v_tangent[0]*v_tangent[0]+v_tangent[1]*v_tangent[1]))
             if distance<0.2:
-                alfa=np.matrix([[10*(distance/0.2)**2, 0, 0],[0, 10*(distance/0.2)**2, 0],[0, 0, 1]])
+                #alfa=np.matrix([[10*(distance/0.2)**2, 0, 0],[0, 10*(distance/0.2)**2, 0],[0, 0, 1]])
+                alfa=np.matrix([[0.7, 0, 0],[0, 0.7, 0],[0, 0, 1]])
             else:
                 alfa=np.matrix([[10, 0, 0],[0, 10, 0],[0, 0, 1]])
             beta=np.matrix([[0.1, 0, 0],[0, 0.1, 0],[0, 0, 1]])     # 0<beta<1  self defination

@@ -94,16 +94,37 @@ from mpl_toolkits.mplot3d import Axes3D
 #for i in range(1003):
 #    #time_data1p[i]=time_data1p[i]-time_data1[1]
 #    real_velo[1,i]=real_velo[1,i]-300
-
-plt.plot(plot_time1,abs_error1,plot_time2,abs_error2,plot_time3,abs_error3,'r')  
+#real_x=real_path[0,0:]
+#real_y=real_path[1,0:]
+#real_z=real_path[2,0:]
+#abs_error=[]
+#for i in range(len(real_x)):
+#    dx=real_x[i]-x
+#    dy=real_y[i]-y
+#    dz=real_z[i]-z
+#         
+#    distance=np.sqrt(dx*dx+dy*dy+dz*dz)  #caculate distance between position and every points in the path
+#    
+#    minindex=np.argmin(distance)
+#    error_x=real_x[i]-x[minindex]
+#    error_y=real_y[i]-y[minindex]
+#    error_z=real_z[i]-z[minindex]
+#    abs_error.append(error_x**2+error_y**2+error_z**2)
+plot_time1=np.linspace(0, 22.68, num=1006)
+plot_time2=np.linspace(0, 18.92, num=800)
+plot_time3=np.linspace(0, 27.43, num=1221)
+#plt.plot(plot_time,abs_error,'r')  
+plt.plot(plot_time1,astar,'b',linewidth=2.5)  
+plt.plot(plot_time2,rrt1,'g',linewidth=2.5)  
+plt.plot(plot_time3,rrt2,'r',linewidth=2.5)  
 #plt.plot(real_velo[1,1:]/1000,soll_velo[2,1:],'r') 
-plt.xlim(0,22.68)
+plt.xlim(0,27.43)
 #plt.ylim(0.57,0.75)
-plt.xlabel('$t$ in s',fontsize = 20)
-plt.ylabel('$|\Delta x|$ in m',fontsize = 20)
-plt.xticks(fontsize = 15)
-plt.yticks(fontsize = 15)
-plt.legend(['A*','RRT 1','RRT 2'],fontsize = 20)
+plt.xlabel('$t$ in s',fontsize = 25)
+plt.ylabel('$|\Delta x|$ in m',fontsize = 25)
+plt.xticks(fontsize = 20)
+plt.yticks(fontsize = 20)
+plt.legend(['A*','RRT 1','RRT 2'],fontsize = 30)
 #ax.set_xlim(0,3.5)
 #ax.set_ylim(0,3.5)
 #ax.set_zlim(0,1.2)
