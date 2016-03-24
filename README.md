@@ -98,23 +98,67 @@ Tested in Windows 8.1 and Mac OS with Python 2.7 in Spyder
 				the next simulation-step is tiggered. This algorythm is repeated, till the goal-position is reached.
 				Afterwards the signals are cleaned up and some plot-data is returned to the main-script.
 				
-        ###UAV_main.py
-                ####imports
-	     	                 numpy.py, for the arrays and some other mathematical operations 
+        ###UAV_mapgen.py
+            ####imports
+				vrep
+				sys
+				numpy
+				time
+				math
+				interpolate
+				deepcopy
+				os.path
+				cPickle 
 	     	####functions
-	     	         #####findnearst
-	     	                 ######input 
-	     	                 position, an array with the 3 coordinates x,y,z in meters which we get after pathfinding
-	     	                 path, an array, contains 1 array for each coordinate, the length of these arrays depends on the length of the path
-	                         ######output
-	                         v_result, a vector which dicides how does the UAV go into the path. 
-	                         v_tangent_nor, the tangent vector after the normalization
-	                         p_near, the nearest point in the path to the current position
-	                         distance, the distance between the nearest point and the current position
-	                         ######code
-	                         if the distance is not too big, the v_result is combined by two vectors: v_approx_nor and v_tangent_nor.The v_approx_nor is the vector which we get from the difference between the current position and the nearest point. We also did the normalization. If the distance is very big, bigger than 0.2 in our case, the v_result comes just from the v_approx. It makes the pathfollowing faster.
+				#####save
+	     	        ######input 
+						array with mapdata
+	                ######output
+	                    array with modified mapdata 
+	                ######code
+						the obstacles are extended, to avoid collisions
+				#####mapgen
+	     	        ######input 
+						scene_name, string, name of the area used as name for the mapdata file
+						x,y,z, integer, dimensions of the area, which will be detected
+						clinetID, integer, needed to execute API-functions
+	                ######output
+	                    array with detected mapdata
+						a file with the mapdata
+	                ######code
+						the sensors are moved through the whole area to detect the obstacles
+				#####mapgen_fast
+	     	        same structure as mapgen, but using more sensors to increase the speed
         
-        
+		###UAV_pathfinding.py
+            ####imports
+				division
+				vrep, needed for the Connection with the Simulator
+				sys
+				numpy, needed for the arrays and some other mathematical operations
+				time
+				math
+				interpolate, needed for the interpolation functions
+				collections, needed for the queue       
+				heapq, needed for the queue
+				random, needed for RRT
+				deepcopy
+	     	####functions
+			There is one main-function "search", which calls other functions, depending on the choosen algorythm. After this part the path is interpolated by using a existing python-libary for it.
+		
+		###pathfollowing.py
+            ####imports
+				numpy, needed for the arrays and some other mathematical operations
+	     	####functions
+				#####findnearest
+	     	        ######input 
+						position, tupel
+						path, array
+	                ######output
+	                    direction, array
+	                ######code
+					Depending on the current position and the path a direction is calculated to follow the path.
+		
         ###Scene: hexagon_neu.ttt
                 #### Abstract: In the scene we have the S311 building which contains the walls and the windows. The goal_new object is the goal which we want the UAV to fly to. You can also move the goal. The UAV script is the main part of the scene. It can control the UAV and also draw the path which we calculated. We learned from our betreuer Raul's script, which will also be discribed on the following. 
                 #### UAV code
@@ -131,41 +175,5 @@ Tested in Windows 8.1 and Mac OS with Python 2.7 in Spyder
                         #####3.Prepare 2 floating views with the camera views.
                         #####4.Control the quadricopter vertical and horizontal by deciding the motor velocities.
                         #####5.Move the target object.
-
-
-
-
-* The function **path_3d(pos, loop)** included in the file "PathGenerationCubic.py" takes as an argument an array of 3D points (pos) where the path should go through and a boolean (loop) which defines if the trayectory is closed or open. The return of the function is an array for each coordinate of the path and the time (path_x, path_y, path_z and path_t).
-
-* The function **calc_vec_field_fast(path_x, path_y, path_z, cube_size, cube_step)** included in the file "FieldGeneration.py" defines a 3D matrix CUBE for the field of size cube_size and with step size cube_step. For each point inside this cube it calculate the best aproximation vector to the path using the methodology explained in the paper: TODO. The return of the function is the calculated vector field and some helper grids for displaying this field in mayavi.
-
-
-
-             
-                   
-                   
-                   
-
-## Example
-
-In the file "example.py" we define 3 points in a closed loop configuration:
-
-```
-Pos0 = array([4, 8, 3])
-Pos1 = array([14, 12, 17])
-Pos2 = array([14, 4, 17])
-Loop = True
-Pos = array([Pos0, Pos1, Pos2])
-
-path_x, path_y, path_z, path_t = path_3d(Pos, Loop)
-```
-
-and then calculate the vector field with:
-
-```
-vector_field_3D, Xc, Yc, Zc = calc_vec_field_fast(X, Y, Z, 20, 1)
-```
-
-Finally this script uses mlab (Mayavi) to show the resulting path, the vector field and the striplines to observe the possible paths from every point in space.
-
-To create a different path it is only necessary to modify the example file (example.py) with diferent paths and cube sizes.
+                
+        
