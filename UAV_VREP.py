@@ -5,86 +5,37 @@ Created on Tue Nov  3 15:31:37 2015
 @author: lijinke
 """
 import vrep#needed for the Connection with the Simulator
-import sys
 import numpy as np#needed for the arrays and some other mathematical operations
 import time
 import math
-from scipy import interpolate#needed for the interpolation functions
-import collections #needed for the queue       
-import heapq#needed for the queue
 import pathfollowing
-import UAV_pathfinding_astar
 
-#vrep.simxFinish(-1)
-#clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Connect to V-REP
-
-
-def getPosition(clientID,goal_new):
-    errorcode,newgoal_handle=vrep.simxGetObjectHandle(clientID,goal_new,vrep.simx_opmode_oneshot_wait)
-    #time.sleep(1) 
-    errorCode,newgoal_position=vrep.simxGetObjectPosition(clientID,newgoal_handle,-1,vrep.simx_opmode_streaming)
+#get the position of an object
+def getPosition(clientID,object_name):
+    #get the handle of the object, which position is needed
+    errorcode,object_handle=vrep.simxGetObjectHandle(clientID,object_name,vrep.simx_opmode_oneshot_wait)
+    #get the position
+    errorCode,object_position=vrep.simxGetObjectPosition(clientID,object_handle,-1,vrep.simx_opmode_streaming)
+    #some waiting time is needed to get the right data    
     time.sleep(1) 
-    errorCode,newgoal_position=vrep.simxGetObjectPosition(clientID,newgoal_handle,-1,vrep.simx_opmode_buffer)
-    return newgoal_position
-    
-#position=getPosition(clientID,'goal_new')
+    errorCode,object_position=vrep.simxGetObjectPosition(clientID,object_handle,-1,vrep.simx_opmode_buffer)
+    return object_position
 
-def angle_calculationx(a,b):
+#calculate the angle between 2 vectors a and b
+def angle_calculation(a,b):
     dot = np.dot(a,b)
     x_modulus = np.sqrt(a[0]**2+a[1]**2+a[2]**2)
     y_modulus = np.sqrt(b[0]**2+b[1]**2+b[2]**2)
     cos_angle = dot / x_modulus / y_modulus 
-    angle = np.arccos(cos_angle) # Winkel in Bogenmaß 
-    #ang2=angle*360/2/np.pi
+    angle = np.arccos(cos_angle) #angle in radiant
     if b[1]>0:
         return angle
     else:
         return -angle
 
-def angle_calculationy(a,b):
-    dot = np.dot(a,b)
-    x_modulus = np.sqrt(a[0]**2+a[1]**2+a[2]**2)
-    y_modulus = np.sqrt(b[0]**2+b[1]**2+b[2]**2)
-    cos_angle = dot / x_modulus / y_modulus 
-    angle = np.arccos(cos_angle) # angle in radiant
-    if a[2]>0:
-        return angle
-    else:
-        return -angle
-
-def showPath(clientID,qubic,color):
-    #Cubic
-    errorCode,Arrow=vrep.simxGetObjectHandle(clientID,'Arrow3',vrep.simx_opmode_oneshot_wait)
-    objectHandles=np.array([Arrow])
-    #put arrows on every point the trajectory pointing in the direction of the next point
-    xpath=qubic[0]
-    ypath=qubic[1]
-    zpath=qubic[2]
-    #print xpath
-    for next in range(len(xpath)):
-        x=xpath[next]
-        y=ypath[next]
-        z=zpath[next]
-    
-        returnCode,newObjectHandles=vrep.simxCopyPasteObjects(clientID,objectHandles,vrep.simx_opmode_oneshot_wait)
-        Arro=newObjectHandles[0]
-        #vrep.simxSetObjectPosition (clientID,Arro,-1,(0,0,0),vrep.simx_opmode_oneshot)
-        #returnCode=vrep.simxSetObjectOrientation(clientID,Arro,-1,[angle_calculationx([0,bdiff,cdiff],[0,0,-1]),-angle_calculationy([0,bdiff,cdiff],[adiff,bdiff,cdiff]),0],vrep.simx_opmode_oneshot) #winkel_berechnen([0,bdiff,cdiff],[adiff,bdiff,cdiff])
-        vrep.simxSetObjectPosition (clientID,Arro,-1,(x,y,z),vrep.simx_opmode_oneshot)  
-
-def show_path2(path,clientID):
-#    errorCode,Ball=vrep.simxGetObjectHandle(clientID,'A_star_points',vrep.simx_opmode_oneshot_wait)
-#    objectHandles=np.array([Ball])
-#    xpath=path2[0]
-#    ypath=path2[1]
-#    zpath=path2[2]
-#    for next in range(len(xpath)):
-#        x=xpath[next]
-#        y=ypath[next]
-#        z=zpath[next]
-#        returnCode,newObjectHandles=vrep.simxCopyPasteObjects(clientID,objectHandles,vrep.simx_opmode_oneshot_wait)
-#        Ball_new=newObjectHandles[0]
-#        vrep.simxSetObjectPosition (clientID,Ball_new,-1,(x,y,z),vrep.simx_opmode_oneshot)
+#show the path in V-REP
+def show_path(path,clientID):
+    #make a signal for each path-component
     datax=path[0]
     datay=path[1]
     dataz=path[2]
@@ -97,42 +48,32 @@ def show_path2(path,clientID):
     packedDataz=vrep.simxPackFloats(dataz)
     vrep.simxClearStringSignal(clientID,'Path_Signalz',vrep.simx_opmode_oneshot)
     vrep.simxSetStringSignal(clientID,'Path_Signalz',packedDataz,vrep.simx_opmode_oneshot)
+    #signals that the data of the path is ready to be read
+    data2=[1]
+    packedData2=vrep.simxPackFloats(data2)
+    vrep.simxClearStringSignal(clientID,'Command_Path_Ready',vrep.simx_opmode_oneshot)
+    vrep.simxSetStringSignal(clientID,'Command_Path_Ready',packedData2,vrep.simx_opmode_oneshot)
         
-def followPath(clientID,path):
-    errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV_target',vrep.simx_opmode_oneshot_wait)
-    for next in range(200):
-        a=path[0]
-        b=path[1]
-        c=path[2]
-        a2=a[next]
-        b2=b[next]
-        c2=c[next]
-        x=round(0.4+0.4*a2,2)
-        y=round(0.2+0.4*b2,2)
-        z=round(0.3+0.4*c2,2)
-        vrep.simxSetObjectPosition (clientID,UAV,-1,(x,y,z),vrep.simx_opmode_oneshot)
-        time.sleep(0.3)
         
-def followPath2(clientID,path,goal):
+def followPath(clientID,path,goal):
+    #arrange the data given to this function
     pathx=path[0]
     pathy=path[1]
     pathz=path[2]
+    #get the start infos for the following
     errorCode,UAV=vrep.simxGetObjectHandle(clientID,'UAV',vrep.simx_opmode_oneshot_wait)
-    #goal=UAV_pathfinding_astar.m_to_grid(goal)
-    #(xgoal,ygoal,zgoal)=goal
     errorCode,pos=vrep.simxGetObjectPosition(clientID,UAV,-1,vrep.simx_opmode_streaming)
     errorCode,orientation=vrep.simxGetObjectOrientation(clientID,UAV,-1,vrep.simx_opmode_streaming)
+    
     time.sleep(0.1) 
     errorCode,pos=vrep.simxGetObjectPosition(clientID,UAV,-1,vrep.simx_opmode_buffer)
     errorCode,orientation=vrep.simxGetObjectOrientation(clientID,UAV,-1,vrep.simx_opmode_buffer)
-    #pos=getPosition(clientID,'UAV')
-    #pos=UAV_pathfinding_astar.m_to_grid(pos)
+    
+    
+    #some initialization
     xPosition=pos[0]
     yPosition=pos[1]
     zPosition=pos[2]
-    xvelomax=0.7
-    yvelomax=0.7
-    zmax=1
     xp=[]
     yp=[]
     zp=[]
@@ -142,43 +83,43 @@ def followPath2(clientID,path,goal):
     xerror=[]
     yerror=[]
     zerror=[]
-
-    vecp=[0,0,0]
-    pdangle=0
-    pveloz=0
-    pangle=0
-    pref_angz=0
-    while (xPosition > pathx[199]+0.1) or (xPosition < pathx[199]-0.1) or (yPosition > pathy[199]+0.1) or (yPosition < pathy[199]-0.1) or (zPosition > pathz[199]+0.1) or (zPosition < pathz[199]-0.1):
-        xvelomax=0.6
-        yvelomax=0.6
-        zmax=1
-        absolut_dis=math.sqrt((xPosition-pathx[199])**2+(yPosition-pathy[199])**2+(zPosition-pathz[199])**2)
-        #print absolut_dis
-        slowvelo_dis=4
-        if absolut_dis < slowvelo_dis:
-            xvelomax=xvelomax*absolut_dis/slowvelo_dis
-            yvelomax=yvelomax*absolut_dis/slowvelo_dis
-            #zmax=zmax*absolut_dis/slowvelo_dis
-            
-            print xvelomax
-            print yvelomax
-            print zmax   
-            
-        start_time = time.time()
-        #pos=getPosition(clientID,'UAV')
+    #define the radius around the goal, in which the UAV is slowed to lower the error between UAV and path
+    slowvelo_dis=4
+    absolut_dis=1
+    #path-following loop
+    #here is the goal defined, in this case reach the goal <5cm, <2cm also works in nearly all case, but needs some more time at the end
+    while (absolut_dis > 0.05):
+        #define the max possible velocities
+        xvelomax=1.5
+        yvelomax=1.5
+        #define the max possible turnrate
+        turnmax=8
+        
+        #refresh the UAV information
         errorCode,pos=vrep.simxGetObjectPosition(clientID,UAV,-1,vrep.simx_opmode_buffer)
         errorCode,orientation=vrep.simxGetObjectOrientation(clientID,UAV,-1,vrep.simx_opmode_buffer)
-        #pos=UAV_pathfinding_astar.m_to_grid(pos)
+        #arrange the information
         xPosition=pos[0]
         yPosition=pos[1]
         zPosition=pos[2]       
         
+        #calculate the distance to the goal
+        absolut_dis=math.sqrt((xPosition-pathx[(len(pathx)-1)])**2+(yPosition-pathy[(len(pathx)-1)])**2+(zPosition-pathz[(len(pathx)-1)])**2)
+        
+        #lower the max velocities in the defined radius, closer to the goal the UAV is more slowed
+        if absolut_dis < slowvelo_dis:
+            xvelomax=(xvelomax-0.15)*absolut_dis/slowvelo_dis*absolut_dis/slowvelo_dis+0.15
+            yvelomax=(yvelomax-0.15)*absolut_dis/slowvelo_dis*absolut_dis/slowvelo_dis+0.15        
+        
+        #save some information for the documentation after the following
         xp.append(xPosition)
         yp.append(yPosition)
         zp.append(zPosition)
-               
-        vec,pnear=pathfollowing.findnearst(pos,path)
         
+        #get the direction the UAV should fly to follow the path
+        vec,vec_path,pnear,dis=pathfollowing.findnearst(pos,path)
+        
+        #some more info for documentation
         xpnear.append(pnear[0])
         ypnear.append(pnear[1])
         zpnear.append(pnear[2])
@@ -187,72 +128,74 @@ def followPath2(clientID,path,goal):
         yerror.append(abs(yPosition-pnear[1]))
         zerror.append(abs(zPosition-pnear[2]))
         
-        
-        
-        #print vec
-        #print vecp
-        #vecp=vec 
-        
-        absolut=math.sqrt(vec[0]**2+vec[1]**2+vec[2]**2)
+        #calculate the velocities from the direction vector
+        absolut=math.sqrt(vec[0,0]**2+vec[0,1]**2)
         xvelo=0
         yvelo=0
         height=zPosition
-    
-        xvelo_w=xvelomax*vec[0]/absolut#ref_velx
-       
-        yvelo_w=yvelomax*vec[1]/absolut#ref_vely
+        xvelo_w=xvelomax*vec[0,0]/absolut#ref_velx
+        yvelo_w=yvelomax*vec[0,1]/absolut#ref_vely
+        height=zPosition+vec[0,2]      #e
         
-        height=zPosition+vec[2]*zmax            #e
-        
-        #print height
         #ref_angz, angle between (1/0/0) and (xvelo/yvelo/0)
         a1=[1,0,0]
-        #b1=[xvelo,yvelo,0]
-        b1=[xvelo_w,yvelo_w,0]
-        ref_angz=angle_calculationx(a1,b1)    
-        if orientation[2]<0:
-            angle=2*np.pi+orientation[2]
-        else:
-            angle=orientation[2]
-        if ref_angz<0:
-            ref_angz=2*np.pi+ref_angz
-        dangle=angle-ref_angz
+        b1=[vec_path[0],vec_path[1],0]
+        ref_angz=angle_calculation(a1,b1)    
         
-        #if dangle>np.pi:
-            #print dangle
+        #arrange some info
+        angle=orientation[2]
+        dangle=ref_angz-angle
+        
+        #angle correction to prevent the UAV from turning not into the shorter direction
         if dangle>np.pi:
-            veloz=6*(2*np.pi-dangle)/np.pi
+            dangle=dangle-2*np.pi
+        if dangle<-np.pi:
+            dangle=2*np.pi+dangle
+        #calculate the turnrate, its lower, if the orientation error is lower, to prevent the UAV from doing a oszillation around the right orientation
+        veloz=turnmax*(dangle)/np.pi
+       
+        #transfom the velocities into the UAV-coordinate-system from the world-coordinates
+        xvelo=xvelo_w*np.cos(angle)+yvelo_w*np.sin(angle)
+        yvelo=yvelo_w*np.cos(angle)-xvelo_w*np.sin(angle)
+        
+        #modify the velocities to improve the path following, by using the current distances and errors to the path and his orientation
+        if abs(vec[0,2])>0.2:
+            xvelo=0
+            yvelo=0
         else:
-            if dangle<-np.pi:
-                veloz=-6*(2*np.pi+dangle)/np.pi
+            if dis<0.5:
+                xvelo=xvelo*((np.pi-abs(dangle))/np.pi)**130*(((0.2-abs(vec[0,2]))/0.2)**6)*((0.5-dis)/0.5)
+                yvelo=yvelo*((np.pi-abs(dangle))/np.pi)**15*(((0.2-abs(vec[0,2]))/0.2)**6)*(dis+0.2)**2
             else:
-                veloz=-6*(dangle)/np.pi
-        #ref_angz=0
-        if dangle-pdangle>1:
-            print pdangle,dangle
-            print pangle,angle
-            print pref_angz,ref_angz
-            print pveloz,veloz
-        pdangle=dangle
-        pveloz=veloz
-        pangle=angle
-        pref_angz=ref_angz
-        xvelo=xvelo_w*np.cos(-orientation[2])-yvelo_w*np.sin(-orientation[2])
-        yvelo=xvelo_w*np.sin(-orientation[2])+yvelo_w*np.cos(-orientation[2])
+                xvelo=xvelo*((np.pi-abs(dangle))/np.pi)**130*(((0.2-abs(vec[0,2]))/0.2)**6)*((0.5-dis)/0.5)
+                yvelo=yvelo*((np.pi-abs(dangle))/np.pi)**15*(((0.2-abs(vec[0,2]))/0.2)**6)
+        if abs(vec_path[2])>0.003:
+            print vec_path[2]
+            xvelo=xvelo*(0.003/abs(vec_path[2]))**3
+            yvelo=yvelo*(0.003/abs(vec_path[2]))
+            height=height+vec[0,2]*4
+        
+        #create the data-signal, which is read to the LUA-script
         data=[xvelo,yvelo,height,0,0,veloz]
-        #data=[-0.1,0,height,0,0,veloz]
-        #print data
         packedData=vrep.simxPackFloats(data)
         vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
         vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
-        #time.sleep(0.5)
-        #print("--- %s seconds ---" % (time.time() - start_time))
-    data=[0,0,height,0,0,0]
+        
+        #trigger the next simulation step
+        vrep.simxSynchronousTrigger(clientID);
+    
+    #clean up some signals
+    data=[0,0,pathz[(len(pathx)-1)],0,0,0]
     packedData=vrep.simxPackFloats(data)
     vrep.simxClearStringSignal(clientID,'Command_Twist_Quad',vrep.simx_opmode_oneshot)
     vrep.simxSetStringSignal(clientID,'Command_Twist_Quad',packedData,vrep.simx_opmode_oneshot)
     
+    data2=[0]
+    packedData2=vrep.simxPackFloats(data2)
+    vrep.simxClearStringSignal(clientID,'Command_Path_Ready',vrep.simx_opmode_oneshot)
+    vrep.simxSetStringSignal(clientID,'Command_Path_Ready',packedData2,vrep.simx_opmode_oneshot)    
     
+    #prepare some data for the plot of the path
     xyzparray=np.ndarray(shape=(3,len(xp)),dtype=float)
     for next in range(len(xp)):
         xyzparray[0,next]=xp[next]
@@ -265,7 +208,7 @@ def followPath2(clientID,path,goal):
         xyzneararray[1,next]=ypnear[next]
         xyzneararray[2,next]=zpnear[next]
         
-        
+    #return plot data   
     return xyzparray,xyzneararray
    
    
